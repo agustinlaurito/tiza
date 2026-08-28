@@ -1,4 +1,4 @@
-# TeachBoard — Agent Rules
+# Tiza — Agent Rules
 
 These invariants must be respected by any AI agent modifying this codebase.
 
@@ -16,7 +16,7 @@ These invariants must be respected by any AI agent modifying this codebase.
 
 - **Schema version** must be incremented when the serialized format changes. Add a migration in `SchemaVersion.swift`.
 - **Unknown keys must be preserved** during round-trip. Use `Codable` with care — do not use `CodingKeys` that exclude unknown fields without a preservation strategy.
-- **The document is a package** (`.teachboard` directory bundle). `document.json` holds metadata and board ordering. Each board's elements live in `boards/{uuid}.json`. Images go in `assets/`.
+- **The document is a package** (`.tiza` directory bundle). `document.json` holds metadata and board ordering. Each board's elements live in `boards/{uuid}.json`. Images go in `assets/`.
 - **Board element data is per-board**, stored in separate files. This enables lazy loading.
 - **`CodableColor`** is the only color representation in the data model. Convert to/from `NSColor`/`CGColor` at the boundary.
 
@@ -30,7 +30,7 @@ These invariants must be respected by any AI agent modifying this codebase.
 ## File Organization
 
 ```
-TeachBoard/
+Tiza/
   App/          — SwiftUI app entry, AppDelegate
   Document/     — Data model, NSDocument/ReferenceFileDocument, schema
   Canvas/       — NSView canvas, camera, renderer, hit-testing

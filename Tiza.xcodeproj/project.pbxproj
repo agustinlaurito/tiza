@@ -1,0 +1,681 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		02534328C0420329BC208774 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF51F8C337E6A5D7821E7A1 /* ToolbarView.swift */; };
+		0709A7B857D4FC4BF54957E9 /* DocumentSerializationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85683E1E3863735E19E03C7 /* DocumentSerializationTests.swift */; };
+		0CDEE2F607B2A2C1E3BC6AE7 /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9E9C41A577D5866546C0B21 /* Tool.swift */; };
+		10445276A1F973BC8743962F /* TizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD68E0BFDABE06FBE808D66 /* TizaApp.swift */; };
+		10D19F2546A6C4F087A677DA /* TizaDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF88FA3CD1E28E4A651CC7A3 /* TizaDocument.swift */; };
+		1DBD28C0924480FC98920088 /* ColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB57412E7C14996AAA488887 /* ColorPalette.swift */; };
+		347A52C6C2BAF354843AE0AD /* WorldPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FF2E672D06211C4BEEBA9C /* WorldPoint.swift */; };
+		3A0C63C41A06684D87DFD057 /* InstrumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF19FC3F0692E4604184F584 /* InstrumentTests.swift */; };
+		410175D9E96B5A9118E82ACC /* ShapeTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA086FFAFCDBE8B9A4E329B /* ShapeTool.swift */; };
+		45B567D9DC259D439B17CED6 /* Element.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F26633A4AE3612FDB28C84 /* Element.swift */; };
+		470CE9F5D3684CF52C5B8CFF /* ToolManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00438DC8FAD9ECE38573B185 /* ToolManager.swift */; };
+		4AEE09D0D1DD3AD8C598B20D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E74EFC9258F14192D86287A7 /* Assets.xcassets */; };
+		4B556CBD93AD080924BB0EAC /* ExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF124FBEDC950DE8EB15631 /* ExportTests.swift */; };
+		523D3137BA0B9E3E01C586E2 /* CanvasRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B915CF7DCAAA283DD587E83A /* CanvasRepresentable.swift */; };
+		58AFFA2408C3F58D4BCC10C0 /* ToolManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D89DFF5DD9B8D714B532809 /* ToolManagerTests.swift */; };
+		614D3552FDC847EB2841AC38 /* CodableColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B0EC0C69F3B950FF6141DEC /* CodableColor.swift */; };
+		632932598177046AA070E81C /* SelectionTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6121C8AECC7E96D66556C8EE /* SelectionTool.swift */; };
+		657DFF81A8499FB4C0754D24 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE94A2A8B8343C31CC494F91 /* Renderer.swift */; };
+		739EC451F05843D3F7CD838F /* StrokeSmoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB9E974FC372DA7FE117503 /* StrokeSmoothing.swift */; };
+		74C9004CADB0EE99D2568BDB /* ElementContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3930D8721F98FB8674A56087 /* ElementContextMenu.swift */; };
+		817E475BC95504BF02097687 /* StrokeSmoothingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50140F7376BDE1A1FE44BA6E /* StrokeSmoothingTests.swift */; };
+		86A9E19D5FAC1C6819DC0C92 /* BoardExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E782ACB87E21135E6F143D /* BoardExporter.swift */; };
+		8D89BEE622C5760B0DE30C49 /* BoardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149ED84BB96B7A0774A11722 /* BoardData.swift */; };
+		960B0E260FC1C832F7FD2FB5 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AD09552CFB07112C964BF9 /* CanvasView.swift */; };
+		97DB1ED69D369FE3416DE1A9 /* HitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EDF4DAEA4CF2FEA7788083 /* HitTestingTests.swift */; };
+		A37FA9165DB99B07580D0BC1 /* HighlighterTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999EFE0F2CAF79B3A874C410 /* HighlighterTool.swift */; };
+		A5F5391B31CD01012487B0BF /* PenTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319474106A913A6E7E3AD00D /* PenTool.swift */; };
+		A6CFC9C2910F38BA44755AE4 /* HitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28A1DEF0860C3BA792E0FFD /* HitTesting.swift */; };
+		B82BA1EDE4198C3EA120ABCE /* InstrumentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D711D0EA9518CB7EAFCEB9D /* InstrumentState.swift */; };
+		BB0138951CB52CDBD3E481F4 /* SchemaVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D2BE2DD8FB3EAF778A0890 /* SchemaVersion.swift */; };
+		BF09DE8C0099E2A5C2DF6EDC /* MainWindowContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BB7562697C6A3537EC377F /* MainWindowContent.swift */; };
+		C43D1108C4434B1C0CDB9692 /* TextTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F0526DA7CF558480CBBD45 /* TextTool.swift */; };
+		CAD34D63ABC58A896BF87C81 /* BoardNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54ACC944DD82A7687CCAC80 /* BoardNavigator.swift */; };
+		D103FC9D320EC19DD7A3A7CD /* ZoomIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414DDE1297B2BA9BFB084FB3 /* ZoomIndicator.swift */; };
+		D4B9A0C499FE5C1B29D90A8D /* BoardDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528A33D844C560CA1C4FC949 /* BoardDataTests.swift */; };
+		DA222C4BE6705D72018AE50C /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7E3FE537152856734174B6 /* Camera.swift */; };
+		DE8C53D861ECD14E79345BAF /* EraserTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B43AD04E4CB07AB5A69D9FD /* EraserTool.swift */; };
+		E2CD4E0D3832EA5AB33B8F30 /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAE56987F7D8D1A0A8398BD /* DocumentModel.swift */; };
+		E30983F78F56EABB7768F869 /* PresentationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F446A90829538A2E7D1F513C /* PresentationManagerTests.swift */; };
+		E91433AFCD6C18A7BA1D5B89 /* CameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83324EE4B346DA1B0B522372 /* CameraTests.swift */; };
+		F04C3E5065A236F6A51767CA /* InstrumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1785F193D80012CFF326210D /* InstrumentManager.swift */; };
+		F4C1D8808E6075DD6F06CCDD /* BoardBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF35508C1589ED50DE254EC6 /* BoardBackground.swift */; };
+		F7B08F3A36E31603B7B5FE60 /* PresentationRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F1E67F91F1EC8F1120FB49 /* PresentationRenderer.swift */; };
+		F830633E2778F9F8DDE5AD9A /* PresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93320346A71D57D7D81C91EB /* PresentationManager.swift */; };
+		F9C73A78FBC4324AF14B75EA /* CodableColorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142040F19D1753BBFA29691F /* CodableColorTests.swift */; };
+		FDD561CB0302A8B34DBDAA6C /* WelcomeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92EA9E1B6C3689EC228A5B6 /* WelcomeOverlay.swift */; };
+		FE5E8F7574918E43A547B258 /* InstrumentHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFF021950A2FA0BD7F607FA /* InstrumentHitTesting.swift */; };
+		FFE0C9D601B50358B6099CA2 /* InstrumentRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C327A9B7315AF3840B1490 /* InstrumentRenderer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9E5077775E7B88783508949F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29FB32CEF71A3BCDC1B75C98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A7A573D5267C5309501EC16C;
+			remoteInfo = Tiza;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00438DC8FAD9ECE38573B185 /* ToolManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolManager.swift; sourceTree = "<group>"; };
+		04FF2E672D06211C4BEEBA9C /* WorldPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldPoint.swift; sourceTree = "<group>"; };
+		0D89DFF5DD9B8D714B532809 /* ToolManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolManagerTests.swift; sourceTree = "<group>"; };
+		142040F19D1753BBFA29691F /* CodableColorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColorTests.swift; sourceTree = "<group>"; };
+		149ED84BB96B7A0774A11722 /* BoardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardData.swift; sourceTree = "<group>"; };
+		1785F193D80012CFF326210D /* InstrumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentManager.swift; sourceTree = "<group>"; };
+		25C327A9B7315AF3840B1490 /* InstrumentRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentRenderer.swift; sourceTree = "<group>"; };
+		2C7E3FE537152856734174B6 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		2CB9E974FC372DA7FE117503 /* StrokeSmoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeSmoothing.swift; sourceTree = "<group>"; };
+		30BB7562697C6A3537EC377F /* MainWindowContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowContent.swift; sourceTree = "<group>"; };
+		319474106A913A6E7E3AD00D /* PenTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PenTool.swift; sourceTree = "<group>"; };
+		34E782ACB87E21135E6F143D /* BoardExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardExporter.swift; sourceTree = "<group>"; };
+		35AEDFCA980FEA6FC6CC7B26 /* Tiza.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tiza.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3930D8721F98FB8674A56087 /* ElementContextMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElementContextMenu.swift; sourceTree = "<group>"; };
+		414DDE1297B2BA9BFB084FB3 /* ZoomIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomIndicator.swift; sourceTree = "<group>"; };
+		50140F7376BDE1A1FE44BA6E /* StrokeSmoothingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeSmoothingTests.swift; sourceTree = "<group>"; };
+		528A33D844C560CA1C4FC949 /* BoardDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardDataTests.swift; sourceTree = "<group>"; };
+		52D64E73B03C7BFE31515C1D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		59D2BE2DD8FB3EAF778A0890 /* SchemaVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaVersion.swift; sourceTree = "<group>"; };
+		6121C8AECC7E96D66556C8EE /* SelectionTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionTool.swift; sourceTree = "<group>"; };
+		61F0526DA7CF558480CBBD45 /* TextTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextTool.swift; sourceTree = "<group>"; };
+		6B0EC0C69F3B950FF6141DEC /* CodableColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColor.swift; sourceTree = "<group>"; };
+		83324EE4B346DA1B0B522372 /* CameraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraTests.swift; sourceTree = "<group>"; };
+		8B43AD04E4CB07AB5A69D9FD /* EraserTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EraserTool.swift; sourceTree = "<group>"; };
+		8D711D0EA9518CB7EAFCEB9D /* InstrumentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentState.swift; sourceTree = "<group>"; };
+		93320346A71D57D7D81C91EB /* PresentationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationManager.swift; sourceTree = "<group>"; };
+		999EFE0F2CAF79B3A874C410 /* HighlighterTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlighterTool.swift; sourceTree = "<group>"; };
+		ABD99676053AC16B566E1303 /* TizaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TizaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B54ACC944DD82A7687CCAC80 /* BoardNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardNavigator.swift; sourceTree = "<group>"; };
+		B915CF7DCAAA283DD587E83A /* CanvasRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasRepresentable.swift; sourceTree = "<group>"; };
+		BFF124FBEDC950DE8EB15631 /* ExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportTests.swift; sourceTree = "<group>"; };
+		C3AD09552CFB07112C964BF9 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+		CBAE56987F7D8D1A0A8398BD /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
+		CF19FC3F0692E4604184F584 /* InstrumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentTests.swift; sourceTree = "<group>"; };
+		D3F26633A4AE3612FDB28C84 /* Element.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Element.swift; sourceTree = "<group>"; };
+		D92EA9E1B6C3689EC228A5B6 /* WelcomeOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeOverlay.swift; sourceTree = "<group>"; };
+		D9E9C41A577D5866546C0B21 /* Tool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tool.swift; sourceTree = "<group>"; };
+		DCFE40B56D483B12ED4F2584 /* Tiza.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Tiza.entitlements; sourceTree = "<group>"; };
+		DDD68E0BFDABE06FBE808D66 /* TizaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TizaApp.swift; sourceTree = "<group>"; };
+		DE94A2A8B8343C31CC494F91 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		DF35508C1589ED50DE254EC6 /* BoardBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardBackground.swift; sourceTree = "<group>"; };
+		DF88FA3CD1E28E4A651CC7A3 /* TizaDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TizaDocument.swift; sourceTree = "<group>"; };
+		E74EFC9258F14192D86287A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E85683E1E3863735E19E03C7 /* DocumentSerializationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSerializationTests.swift; sourceTree = "<group>"; };
+		EAF51F8C337E6A5D7821E7A1 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
+		EDA086FFAFCDBE8B9A4E329B /* ShapeTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeTool.swift; sourceTree = "<group>"; };
+		EEFF021950A2FA0BD7F607FA /* InstrumentHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentHitTesting.swift; sourceTree = "<group>"; };
+		F28A1DEF0860C3BA792E0FFD /* HitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitTesting.swift; sourceTree = "<group>"; };
+		F2F1E67F91F1EC8F1120FB49 /* PresentationRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationRenderer.swift; sourceTree = "<group>"; };
+		F446A90829538A2E7D1F513C /* PresentationManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationManagerTests.swift; sourceTree = "<group>"; };
+		F4EDF4DAEA4CF2FEA7788083 /* HitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitTestingTests.swift; sourceTree = "<group>"; };
+		FB57412E7C14996AAA488887 /* ColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPalette.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1451267C12C41ED7D737E768 = {
+			isa = PBXGroup;
+			children = (
+				28A189C7E3C94611005EAD7B /* Tiza */,
+				8ADAD5510A934BA4F4792F4B /* TizaTests */,
+				8A8E3088357C10EBA81C373A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		16B5E5F3B10F6A40163FB1E3 /* Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				04FF2E672D06211C4BEEBA9C /* WorldPoint.swift */,
+			);
+			path = Geometry;
+			sourceTree = "<group>";
+		};
+		28A189C7E3C94611005EAD7B /* Tiza */ = {
+			isa = PBXGroup;
+			children = (
+				AC48A4FE27C6E378FAF416EE /* App */,
+				36A68E6D54BCF5CDF165BC4A /* Canvas */,
+				4904A30A4A3E49BC90F8D48A /* Document */,
+				83063D75B606F3590810AC07 /* Export */,
+				16B5E5F3B10F6A40163FB1E3 /* Geometry */,
+				63024DD328E1CC202B2EEC98 /* Instruments */,
+				D47BEE27172B26B29E230B11 /* Presentation */,
+				78882419B214E7FE875C408D /* Resources */,
+				C92207F4B2E24E997544D626 /* Tools */,
+				3CE97B60A5164D8E8405597E /* UI */,
+			);
+			path = Tiza;
+			sourceTree = "<group>";
+		};
+		36A68E6D54BCF5CDF165BC4A /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				DF35508C1589ED50DE254EC6 /* BoardBackground.swift */,
+				2C7E3FE537152856734174B6 /* Camera.swift */,
+				B915CF7DCAAA283DD587E83A /* CanvasRepresentable.swift */,
+				C3AD09552CFB07112C964BF9 /* CanvasView.swift */,
+				F28A1DEF0860C3BA792E0FFD /* HitTesting.swift */,
+				DE94A2A8B8343C31CC494F91 /* Renderer.swift */,
+			);
+			path = Canvas;
+			sourceTree = "<group>";
+		};
+		3CE97B60A5164D8E8405597E /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B54ACC944DD82A7687CCAC80 /* BoardNavigator.swift */,
+				FB57412E7C14996AAA488887 /* ColorPalette.swift */,
+				3930D8721F98FB8674A56087 /* ElementContextMenu.swift */,
+				30BB7562697C6A3537EC377F /* MainWindowContent.swift */,
+				EAF51F8C337E6A5D7821E7A1 /* ToolbarView.swift */,
+				D92EA9E1B6C3689EC228A5B6 /* WelcomeOverlay.swift */,
+				414DDE1297B2BA9BFB084FB3 /* ZoomIndicator.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		4904A30A4A3E49BC90F8D48A /* Document */ = {
+			isa = PBXGroup;
+			children = (
+				149ED84BB96B7A0774A11722 /* BoardData.swift */,
+				6B0EC0C69F3B950FF6141DEC /* CodableColor.swift */,
+				CBAE56987F7D8D1A0A8398BD /* DocumentModel.swift */,
+				D3F26633A4AE3612FDB28C84 /* Element.swift */,
+				59D2BE2DD8FB3EAF778A0890 /* SchemaVersion.swift */,
+				DF88FA3CD1E28E4A651CC7A3 /* TizaDocument.swift */,
+			);
+			path = Document;
+			sourceTree = "<group>";
+		};
+		63024DD328E1CC202B2EEC98 /* Instruments */ = {
+			isa = PBXGroup;
+			children = (
+				EEFF021950A2FA0BD7F607FA /* InstrumentHitTesting.swift */,
+				1785F193D80012CFF326210D /* InstrumentManager.swift */,
+				25C327A9B7315AF3840B1490 /* InstrumentRenderer.swift */,
+				8D711D0EA9518CB7EAFCEB9D /* InstrumentState.swift */,
+			);
+			path = Instruments;
+			sourceTree = "<group>";
+		};
+		78882419B214E7FE875C408D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E74EFC9258F14192D86287A7 /* Assets.xcassets */,
+				52D64E73B03C7BFE31515C1D /* Info.plist */,
+				DCFE40B56D483B12ED4F2584 /* Tiza.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		83063D75B606F3590810AC07 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				34E782ACB87E21135E6F143D /* BoardExporter.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		8A8E3088357C10EBA81C373A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				35AEDFCA980FEA6FC6CC7B26 /* Tiza.app */,
+				ABD99676053AC16B566E1303 /* TizaTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8ADAD5510A934BA4F4792F4B /* TizaTests */ = {
+			isa = PBXGroup;
+			children = (
+				528A33D844C560CA1C4FC949 /* BoardDataTests.swift */,
+				83324EE4B346DA1B0B522372 /* CameraTests.swift */,
+				142040F19D1753BBFA29691F /* CodableColorTests.swift */,
+				E85683E1E3863735E19E03C7 /* DocumentSerializationTests.swift */,
+				BFF124FBEDC950DE8EB15631 /* ExportTests.swift */,
+				F4EDF4DAEA4CF2FEA7788083 /* HitTestingTests.swift */,
+				CF19FC3F0692E4604184F584 /* InstrumentTests.swift */,
+				F446A90829538A2E7D1F513C /* PresentationManagerTests.swift */,
+				50140F7376BDE1A1FE44BA6E /* StrokeSmoothingTests.swift */,
+				0D89DFF5DD9B8D714B532809 /* ToolManagerTests.swift */,
+			);
+			path = TizaTests;
+			sourceTree = "<group>";
+		};
+		AC48A4FE27C6E378FAF416EE /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DDD68E0BFDABE06FBE808D66 /* TizaApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C92207F4B2E24E997544D626 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				8B43AD04E4CB07AB5A69D9FD /* EraserTool.swift */,
+				999EFE0F2CAF79B3A874C410 /* HighlighterTool.swift */,
+				319474106A913A6E7E3AD00D /* PenTool.swift */,
+				6121C8AECC7E96D66556C8EE /* SelectionTool.swift */,
+				EDA086FFAFCDBE8B9A4E329B /* ShapeTool.swift */,
+				2CB9E974FC372DA7FE117503 /* StrokeSmoothing.swift */,
+				61F0526DA7CF558480CBBD45 /* TextTool.swift */,
+				D9E9C41A577D5866546C0B21 /* Tool.swift */,
+				00438DC8FAD9ECE38573B185 /* ToolManager.swift */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		D47BEE27172B26B29E230B11 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				93320346A71D57D7D81C91EB /* PresentationManager.swift */,
+				F2F1E67F91F1EC8F1120FB49 /* PresentationRenderer.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7FE02C5E6EC2FEE32F22783E /* TizaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2C3A8B36789DBAE4AF80D38F /* Build configuration list for PBXNativeTarget "TizaTests" */;
+			buildPhases = (
+				A54776A9162485CDFBC50DD9 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F4D18E69BC2D1A54EFC01DEA /* PBXTargetDependency */,
+			);
+			name = TizaTests;
+			packageProductDependencies = (
+			);
+			productName = TizaTests;
+			productReference = ABD99676053AC16B566E1303 /* TizaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A7A573D5267C5309501EC16C /* Tiza */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D6D41EE354E0A929456BFA6 /* Build configuration list for PBXNativeTarget "Tiza" */;
+			buildPhases = (
+				93D2924703CED6D9DEB0872C /* Sources */,
+				B9DB665102D840CEE9763240 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Tiza;
+			packageProductDependencies = (
+			);
+			productName = Tiza;
+			productReference = 35AEDFCA980FEA6FC6CC7B26 /* Tiza.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29FB32CEF71A3BCDC1B75C98 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 533254878A0F5DE80A9360B4 /* Build configuration list for PBXProject "Tiza" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1451267C12C41ED7D737E768;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8A8E3088357C10EBA81C373A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A7A573D5267C5309501EC16C /* Tiza */,
+				7FE02C5E6EC2FEE32F22783E /* TizaTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B9DB665102D840CEE9763240 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AEE09D0D1DD3AD8C598B20D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		93D2924703CED6D9DEB0872C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4C1D8808E6075DD6F06CCDD /* BoardBackground.swift in Sources */,
+				8D89BEE622C5760B0DE30C49 /* BoardData.swift in Sources */,
+				86A9E19D5FAC1C6819DC0C92 /* BoardExporter.swift in Sources */,
+				CAD34D63ABC58A896BF87C81 /* BoardNavigator.swift in Sources */,
+				DA222C4BE6705D72018AE50C /* Camera.swift in Sources */,
+				523D3137BA0B9E3E01C586E2 /* CanvasRepresentable.swift in Sources */,
+				960B0E260FC1C832F7FD2FB5 /* CanvasView.swift in Sources */,
+				614D3552FDC847EB2841AC38 /* CodableColor.swift in Sources */,
+				1DBD28C0924480FC98920088 /* ColorPalette.swift in Sources */,
+				E2CD4E0D3832EA5AB33B8F30 /* DocumentModel.swift in Sources */,
+				45B567D9DC259D439B17CED6 /* Element.swift in Sources */,
+				74C9004CADB0EE99D2568BDB /* ElementContextMenu.swift in Sources */,
+				DE8C53D861ECD14E79345BAF /* EraserTool.swift in Sources */,
+				A37FA9165DB99B07580D0BC1 /* HighlighterTool.swift in Sources */,
+				A6CFC9C2910F38BA44755AE4 /* HitTesting.swift in Sources */,
+				FE5E8F7574918E43A547B258 /* InstrumentHitTesting.swift in Sources */,
+				F04C3E5065A236F6A51767CA /* InstrumentManager.swift in Sources */,
+				FFE0C9D601B50358B6099CA2 /* InstrumentRenderer.swift in Sources */,
+				B82BA1EDE4198C3EA120ABCE /* InstrumentState.swift in Sources */,
+				BF09DE8C0099E2A5C2DF6EDC /* MainWindowContent.swift in Sources */,
+				A5F5391B31CD01012487B0BF /* PenTool.swift in Sources */,
+				F830633E2778F9F8DDE5AD9A /* PresentationManager.swift in Sources */,
+				F7B08F3A36E31603B7B5FE60 /* PresentationRenderer.swift in Sources */,
+				657DFF81A8499FB4C0754D24 /* Renderer.swift in Sources */,
+				BB0138951CB52CDBD3E481F4 /* SchemaVersion.swift in Sources */,
+				632932598177046AA070E81C /* SelectionTool.swift in Sources */,
+				410175D9E96B5A9118E82ACC /* ShapeTool.swift in Sources */,
+				739EC451F05843D3F7CD838F /* StrokeSmoothing.swift in Sources */,
+				C43D1108C4434B1C0CDB9692 /* TextTool.swift in Sources */,
+				10445276A1F973BC8743962F /* TizaApp.swift in Sources */,
+				10D19F2546A6C4F087A677DA /* TizaDocument.swift in Sources */,
+				0CDEE2F607B2A2C1E3BC6AE7 /* Tool.swift in Sources */,
+				470CE9F5D3684CF52C5B8CFF /* ToolManager.swift in Sources */,
+				02534328C0420329BC208774 /* ToolbarView.swift in Sources */,
+				FDD561CB0302A8B34DBDAA6C /* WelcomeOverlay.swift in Sources */,
+				347A52C6C2BAF354843AE0AD /* WorldPoint.swift in Sources */,
+				D103FC9D320EC19DD7A3A7CD /* ZoomIndicator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A54776A9162485CDFBC50DD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4B9A0C499FE5C1B29D90A8D /* BoardDataTests.swift in Sources */,
+				E91433AFCD6C18A7BA1D5B89 /* CameraTests.swift in Sources */,
+				F9C73A78FBC4324AF14B75EA /* CodableColorTests.swift in Sources */,
+				0709A7B857D4FC4BF54957E9 /* DocumentSerializationTests.swift in Sources */,
+				4B556CBD93AD080924BB0EAC /* ExportTests.swift in Sources */,
+				97DB1ED69D369FE3416DE1A9 /* HitTestingTests.swift in Sources */,
+				3A0C63C41A06684D87DFD057 /* InstrumentTests.swift in Sources */,
+				E30983F78F56EABB7768F869 /* PresentationManagerTests.swift in Sources */,
+				817E475BC95504BF02097687 /* StrokeSmoothingTests.swift in Sources */,
+				58AFFA2408C3F58D4BCC10C0 /* ToolManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F4D18E69BC2D1A54EFC01DEA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A7A573D5267C5309501EC16C /* Tiza */;
+			targetProxy = 9E5077775E7B88783508949F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1847BD95019A4E66366F0A62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Tiza/Resources/Tiza.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Tiza/Resources/Info.plist;
+				INFOPLIST_KEY_NSDocumentClass = "$(PRODUCT_MODULE_NAME).TizaDocument";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Release;
+		};
+		2C1DF61454D5444A5719F4C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_MODULE_NAME = TizaTests;
+				SDKROOT = macosx;
+				SWIFT_EMIT_MODULE_INTERFACE = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tiza.app/Contents/MacOS/Tiza";
+			};
+			name = Release;
+		};
+		78271E61367FE5036F8155DF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Tiza/Resources/Tiza.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Tiza/Resources/Info.plist;
+				INFOPLIST_KEY_NSDocumentClass = "$(PRODUCT_MODULE_NAME).TizaDocument";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Debug;
+		};
+		86AD3F97EDA82B781E35CACC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Tiza;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.Tiza;
+				PRODUCT_NAME = Tiza;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		8757BC5CA457AA01AD2FEB3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_MODULE_NAME = TizaTests;
+				SDKROOT = macosx;
+				SWIFT_EMIT_MODULE_INTERFACE = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tiza.app/Contents/MacOS/Tiza";
+			};
+			name = Debug;
+		};
+		DE3F53016874CCAA21E5A3B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Tiza;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.Tiza;
+				PRODUCT_NAME = Tiza;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2C3A8B36789DBAE4AF80D38F /* Build configuration list for PBXNativeTarget "TizaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8757BC5CA457AA01AD2FEB3B /* Debug */,
+				2C1DF61454D5444A5719F4C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4D6D41EE354E0A929456BFA6 /* Build configuration list for PBXNativeTarget "Tiza" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78271E61367FE5036F8155DF /* Debug */,
+				1847BD95019A4E66366F0A62 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		533254878A0F5DE80A9360B4 /* Build configuration list for PBXProject "Tiza" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE3F53016874CCAA21E5A3B0 /* Debug */,
+				86AD3F97EDA82B781E35CACC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29FB32CEF71A3BCDC1B75C98 /* Project object */;
+}

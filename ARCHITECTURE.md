@@ -1,8 +1,8 @@
-# TeachBoard Architecture
+# Tiza Architecture
 
 ## Overview
 
-TeachBoard is a native macOS whiteboard for teaching. It uses SwiftUI for app lifecycle and UI chrome, with an AppKit NSView for the high-performance drawing canvas.
+Tiza is a native macOS whiteboard for teaching. It uses SwiftUI for app lifecycle and UI chrome, with an AppKit NSView for the high-performance drawing canvas.
 
 ```
 SwiftUI App (DocumentGroup)
@@ -34,7 +34,7 @@ Coordinate conversion is centralized in `Camera.swift`. Never duplicate this mat
 ### Package Format
 
 ```
-MyClass.teachboard/
+MyClass.tiza/
   document.json          — DocumentModel (metadata, board list, schema version)
   boards/
     {uuid}.json          — BoardData (elements for one board)
@@ -131,8 +131,8 @@ Uses `NSUndoManager` (provided by the SwiftUI document environment). All persist
 xcodegen generate
 
 # Build
-xcodebuild -project TeachBoard.xcodeproj -scheme TeachBoard build
+xcodebuild -project Tiza.xcodeproj -scheme Tiza build
 
 # Test
-xcodebuild -project TeachBoard.xcodeproj -scheme TeachBoard test
+xcodebuild -project Tiza.xcodeproj -scheme Tiza test
 ```
