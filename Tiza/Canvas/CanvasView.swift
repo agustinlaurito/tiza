@@ -105,6 +105,11 @@ final class CanvasView: NSView {
                                   in: ctx, camera: camera, viewSize: viewSize)
         }
 
+        if !tm.activeSmartGuides.isEmpty {
+            Renderer.drawSmartGuides(tm.activeSmartGuides, in: ctx,
+                                      camera: camera, viewSize: viewSize)
+        }
+
         if !tm.selectedElementIds.isEmpty, let board = boardData {
             if let resizeBounds = tm.resizingBounds {
                 Renderer.drawSelectionHandles(resizeBounds, offset: .zero,

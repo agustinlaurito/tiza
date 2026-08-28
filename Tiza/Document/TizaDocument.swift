@@ -482,6 +482,115 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
         }
     }
 
+    // MARK: - Group / Ungroup
+
+    func groupElements(ids: Set<UUID>, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id], ids.count >= 2 else { return }
+
+        let groupId = UUID()
+        let oldElements = board.elements
+
+        for i in board.elements.indices where ids.contains(board.elements[i].id) {
+            board.elements[i].groupId = groupId
+        }
+        boardDataMap[ref.id] = board
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            guard var b = doc.boardDataMap[ref.id] else { return }
+            b.elements = oldElements
+            doc.boardDataMap[ref.id] = b
+            undoManager?.registerUndo(withTarget: doc) { doc2 in
+                doc2.groupElements(ids: ids, undoManager: undoManager)
+            }
+        }
+    }
+
+    func ungroupElements(ids: Set<UUID>, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id] else { return }
+
+        let groupIds = Set(board.elements.filter { ids.contains($0.id) }.compactMap(\.groupId))
+        guard !groupIds.isEmpty else { return }
+
+        let oldElements = board.elements
+
+        for i in board.elements.indices {
+            if let gid = board.elements[i].groupId, groupIds.contains(gid) {
+                board.elements[i].groupId = nil
+            }
+        }
+        boardDataMap[ref.id] = board
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            guard var b = doc.boardDataMap[ref.id] else { return }
+            b.elements = oldElements
+            doc.boardDataMap[ref.id] = b
+            undoManager?.registerUndo(withTarget: doc) { doc2 in
+                doc2.ungroupElements(ids: ids, undoManager: undoManager)
+            }
+        }
+    }
+
+    func idsInSameGroup(as ids: Set<UUID>) -> Set<UUID> {
+        guard let board = activeBoardData else { return ids }
+        let groupIds = Set(board.elements.filter { ids.contains($0.id) }.compactMap(\.groupId))
+        guard !groupIds.isEmpty else { return ids }
+        let grouped = board.elements.filter { $0.groupId != nil && groupIds.contains($0.groupId!) }
+        return ids.union(Set(grouped.map(\.id)))
+    }
+
+    // MARK: - Lock / Unlock
+
+    func toggleLock(ids: Set<UUID>, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id] else { return }
+
+        let anyLocked = board.elements.filter { ids.contains($0.id) }.contains { $0.locked }
+        let newValue = !anyLocked
+
+        let oldElements = board.elements
+        for i in board.elements.indices where ids.contains(board.elements[i].id) {
+            board.elements[i].locked = newValue
+        }
+        boardDataMap[ref.id] = board
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            guard var b = doc.boardDataMap[ref.id] else { return }
+            b.elements = oldElements
+            doc.boardDataMap[ref.id] = b
+            undoManager?.registerUndo(withTarget: doc) { doc2 in
+                doc2.toggleLock(ids: ids, undoManager: undoManager)
+            }
+        }
+    }
+
+    // MARK: - Copy / Paste
+
+    func copyElements(ids: Set<UUID>) -> [Element] {
+        guard let board = activeBoardData else { return [] }
+        return board.elements.filter { ids.contains($0.id) }
+    }
+
+    func pasteElements(_ elements: [Element], at offset: CGPoint = CGPoint(x: 20, y: 20),
+                        undoManager: UndoManager? = nil) -> Set<UUID> {
+        var newIds = Set<UUID>()
+        let baseZ = activeBoardData?.nextZIndex ?? 0
+
+        undoManager?.beginUndoGrouping()
+        for (i, element) in elements.enumerated() {
+            var copy = element
+            copy.id = UUID()
+            copy.zIndex = baseZ + i
+            copy.groupId = nil
+            copy = Self.offsetElement(copy, by: offset)
+            addElement(copy, undoManager: undoManager)
+            newIds.insert(copy.id)
+        }
+        undoManager?.endUndoGrouping()
+        return newIds
+    }
+
     func clearBoard(undoManager: UndoManager? = nil) {
         guard let ref = activeBoardReference,
               var board = boardDataMap[ref.id], !board.elements.isEmpty else { return }

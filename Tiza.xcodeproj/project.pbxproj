@@ -28,6 +28,7 @@
 		739EC451F05843D3F7CD838F /* StrokeSmoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB9E974FC372DA7FE117503 /* StrokeSmoothing.swift */; };
 		74C9004CADB0EE99D2568BDB /* ElementContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3930D8721F98FB8674A56087 /* ElementContextMenu.swift */; };
 		817E475BC95504BF02097687 /* StrokeSmoothingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50140F7376BDE1A1FE44BA6E /* StrokeSmoothingTests.swift */; };
+		81E443D4D3260D5CAE01BD5F /* ShapeRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156F773829904F9A0E9C8F4A /* ShapeRecognizer.swift */; };
 		86A9E19D5FAC1C6819DC0C92 /* BoardExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E782ACB87E21135E6F143D /* BoardExporter.swift */; };
 		8D89BEE622C5760B0DE30C49 /* BoardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149ED84BB96B7A0774A11722 /* BoardData.swift */; };
 		960B0E260FC1C832F7FD2FB5 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AD09552CFB07112C964BF9 /* CanvasView.swift */; };
@@ -73,6 +74,7 @@
 		0D89DFF5DD9B8D714B532809 /* ToolManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolManagerTests.swift; sourceTree = "<group>"; };
 		142040F19D1753BBFA29691F /* CodableColorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColorTests.swift; sourceTree = "<group>"; };
 		149ED84BB96B7A0774A11722 /* BoardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardData.swift; sourceTree = "<group>"; };
+		156F773829904F9A0E9C8F4A /* ShapeRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeRecognizer.swift; sourceTree = "<group>"; };
 		1785F193D80012CFF326210D /* InstrumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentManager.swift; sourceTree = "<group>"; };
 		25C327A9B7315AF3840B1490 /* InstrumentRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentRenderer.swift; sourceTree = "<group>"; };
 		2C7E3FE537152856734174B6 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				999EFE0F2CAF79B3A874C410 /* HighlighterTool.swift */,
 				319474106A913A6E7E3AD00D /* PenTool.swift */,
 				6121C8AECC7E96D66556C8EE /* SelectionTool.swift */,
+				156F773829904F9A0E9C8F4A /* ShapeRecognizer.swift */,
 				EDA086FFAFCDBE8B9A4E329B /* ShapeTool.swift */,
 				2CB9E974FC372DA7FE117503 /* StrokeSmoothing.swift */,
 				61F0526DA7CF558480CBBD45 /* TextTool.swift */,
@@ -397,6 +400,7 @@
 				657DFF81A8499FB4C0754D24 /* Renderer.swift in Sources */,
 				BB0138951CB52CDBD3E481F4 /* SchemaVersion.swift in Sources */,
 				632932598177046AA070E81C /* SelectionTool.swift in Sources */,
+				81E443D4D3260D5CAE01BD5F /* ShapeRecognizer.swift in Sources */,
 				410175D9E96B5A9118E82ACC /* ShapeTool.swift in Sources */,
 				739EC451F05843D3F7CD838F /* StrokeSmoothing.swift in Sources */,
 				C43D1108C4434B1C0CDB9692 /* TextTool.swift in Sources */,

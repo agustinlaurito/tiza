@@ -343,6 +343,46 @@ struct MainWindowContent: View {
             return true
         }
 
+        if flags == .command, event.charactersIgnoringModifiers == "g" {
+            let ids = toolManager.selectedElementIds
+            if ids.count >= 2 {
+                document.groupElements(ids: ids, undoManager: undoManager)
+            }
+            return true
+        }
+
+        if flags == [.shift, .command], event.charactersIgnoringModifiers == "g" {
+            let ids = toolManager.selectedElementIds
+            if !ids.isEmpty {
+                document.ungroupElements(ids: ids, undoManager: undoManager)
+            }
+            return true
+        }
+
+        if flags == .command, event.charactersIgnoringModifiers == "l" {
+            let ids = toolManager.selectedElementIds
+            if !ids.isEmpty {
+                document.toggleLock(ids: ids, undoManager: undoManager)
+            }
+            return true
+        }
+
+        if flags == .command, event.charactersIgnoringModifiers == "c" {
+            let ids = toolManager.selectedElementIds
+            if !ids.isEmpty {
+                toolManager.clipboard = document.copyElements(ids: ids)
+            }
+            return true
+        }
+
+        if flags == .command, event.charactersIgnoringModifiers == "v" {
+            if !toolManager.clipboard.isEmpty {
+                let newIds = document.pasteElements(toolManager.clipboard, undoManager: undoManager)
+                toolManager.selectedElementIds = newIds
+            }
+            return true
+        }
+
         return false
     }
 

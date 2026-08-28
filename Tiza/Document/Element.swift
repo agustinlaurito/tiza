@@ -4,11 +4,18 @@ struct Element: Codable, Identifiable, Equatable {
     var id: UUID
     var type: ElementType
     var zIndex: Int
+    var locked: Bool = false
+    var opacity: Double = 1.0
+    var groupId: UUID? = nil
 
-    init(id: UUID = UUID(), type: ElementType, zIndex: Int) {
+    init(id: UUID = UUID(), type: ElementType, zIndex: Int,
+         locked: Bool = false, opacity: Double = 1.0, groupId: UUID? = nil) {
         self.id = id
         self.type = type
         self.zIndex = zIndex
+        self.locked = locked
+        self.opacity = opacity
+        self.groupId = groupId
     }
 }
 
@@ -24,11 +31,34 @@ enum StrokeStyle: String, Codable, Equatable {
     case highlighter
 }
 
+enum DashStyle: String, Codable, Equatable, CaseIterable {
+    case solid
+    case dashed
+    case dotted
+
+    var displayName: String {
+        switch self {
+        case .solid: "Solid"
+        case .dashed: "Dashed"
+        case .dotted: "Dotted"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .solid: "line.diagonal"
+        case .dashed: "line.horizontal.star.fill.line.horizontal"
+        case .dotted: "ellipsis"
+        }
+    }
+}
+
 struct StrokeData: Codable, Equatable {
     var points: [[Double]]
     var color: CodableColor
     var thickness: Double
     var style: StrokeStyle
+    var dashStyle: DashStyle = .solid
 }
 
 enum ShapeType: String, Codable, Equatable {
@@ -36,6 +66,9 @@ enum ShapeType: String, Codable, Equatable {
     case ellipse
     case line
     case arrow
+    case triangle
+    case diamond
+    case star
 }
 
 struct ShapeData: Codable, Equatable {
@@ -46,6 +79,7 @@ struct ShapeData: Codable, Equatable {
     var strokeColor: CodableColor
     var fillColor: CodableColor?
     var strokeWidth: Double
+    var dashStyle: DashStyle = .solid
 }
 
 enum FontStyle: String, Codable, Equatable, CaseIterable {

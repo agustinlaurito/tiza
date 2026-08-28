@@ -1,7 +1,7 @@
 import AppKit
 
 enum ToolType: String, CaseIterable, Identifiable {
-    case select, pen, highlighter, eraser, text, line, arrow, rectangle, ellipse
+    case select, pen, highlighter, eraser, text, line, arrow, rectangle, ellipse, triangle, diamond, star
 
     var id: String { rawValue }
 
@@ -16,6 +16,9 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .arrow: "Arrow"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
+        case .triangle: "Triangle"
+        case .diamond: "Diamond"
+        case .star: "Star"
         }
     }
 
@@ -30,6 +33,9 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .arrow: "arrow.up.right"
         case .rectangle: "rectangle"
         case .ellipse: "circle"
+        case .triangle: "triangle"
+        case .diamond: "diamond"
+        case .star: "star"
         }
     }
 
@@ -44,6 +50,9 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .arrow: "a"
         case .rectangle: "r"
         case .ellipse: "o"
+        case .triangle: "g"
+        case .diamond: "d"
+        case .star: "s"
         }
     }
 

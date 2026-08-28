@@ -11,6 +11,9 @@ final class ShapeTool: Tool {
         case .arrow: .arrow
         case .rectangle: .rectangle
         case .ellipse: .ellipse
+        case .triangle: .triangle
+        case .diamond: .diamond
+        case .star: .star
         default: .rectangle
         }
     }
@@ -93,7 +96,7 @@ final class ShapeTool: Tool {
             let dist = hypot(dx, dy)
             return CGPoint(x: start.x + dist * cos(snappedAngle),
                            y: start.y + dist * sin(snappedAngle))
-        case .rectangle, .ellipse:
+        case .rectangle, .ellipse, .triangle, .diamond, .star:
             let dx = point.x - start.x
             let dy = point.y - start.y
             let side = max(abs(dx), abs(dy))
@@ -106,7 +109,7 @@ final class ShapeTool: Tool {
         switch shapeType {
         case .line, .arrow:
             return (start, CGSize(width: end.x - start.x, height: end.y - start.y))
-        case .rectangle, .ellipse:
+        case .rectangle, .ellipse, .triangle, .diamond, .star:
             let origin = CGPoint(x: min(start.x, end.x), y: min(start.y, end.y))
             let size = CGSize(width: abs(end.x - start.x), height: abs(end.y - start.y))
             return (origin, size)

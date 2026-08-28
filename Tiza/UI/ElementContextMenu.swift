@@ -72,6 +72,9 @@ struct ElementContextMenu: View {
             }
 
             menuDivider
+            groupButton
+            lockAllButton
+            menuDivider
             deleteAllButton
         }
     }
@@ -116,7 +119,17 @@ struct ElementContextMenu: View {
                 }
             }
             menuDivider
-            scaleButtons(elementId: elementId)
+            dashStyleButtons(current: data.dashStyle) { newDash in
+                document.updateElement(id: elementId, undoManager: undoManager) { el in
+                    if case .stroke(var d) = el.type {
+                        d.dashStyle = newDash
+                        el.type = .stroke(d)
+                    }
+                }
+            }
+            menuDivider
+            opacityButtons(elementId: elementId)
+            lockButton(elementId: elementId)
             menuDivider
             copyButton(elementId: elementId)
             deleteButton(elementId: elementId)
@@ -136,6 +149,8 @@ struct ElementContextMenu: View {
                 }
             }
             menuDivider
+            fillColorButton(elementId: elementId, currentFill: data.fillColor, strokeColor: data.strokeColor)
+            menuDivider
             thicknessButtons(current: data.strokeWidth) { newThickness in
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
                     document.updateElement(id: elementId, undoManager: undoManager) { el in
@@ -147,7 +162,17 @@ struct ElementContextMenu: View {
                 }
             }
             menuDivider
-            scaleButtons(elementId: elementId)
+            dashStyleButtons(current: data.dashStyle) { newDash in
+                document.updateElement(id: elementId, undoManager: undoManager) { el in
+                    if case .shape(var d) = el.type {
+                        d.dashStyle = newDash
+                        el.type = .shape(d)
+                    }
+                }
+            }
+            menuDivider
+            opacityButtons(elementId: elementId)
+            lockButton(elementId: elementId)
             menuDivider
             copyButton(elementId: elementId)
             deleteButton(elementId: elementId)
@@ -202,6 +227,9 @@ struct ElementContextMenu: View {
             }
 
             menuDivider
+            opacityButtons(elementId: elementId)
+            lockButton(elementId: elementId)
+            menuDivider
             copyButton(elementId: elementId)
             deleteButton(elementId: elementId)
         }
@@ -210,6 +238,9 @@ struct ElementContextMenu: View {
     private func imageMenu(elementId: UUID) -> some View {
         HStack(spacing: 4) {
             scaleButtons(elementId: elementId)
+            menuDivider
+            opacityButtons(elementId: elementId)
+            lockButton(elementId: elementId)
             menuDivider
             copyButton(elementId: elementId)
             deleteButton(elementId: elementId)
@@ -420,6 +451,154 @@ struct ElementContextMenu: View {
         case .serif: .system(size: size, weight: .medium, design: .serif)
         case .rounded: .system(size: size, weight: .medium, design: .rounded)
         }
+    }
+
+    // MARK: - Fill Color
+
+    private func fillColorButton(elementId: UUID, currentFill: CodableColor?, strokeColor: CodableColor) -> some View {
+        HStack(spacing: 2) {
+            Button {
+                document.updateElement(id: elementId, undoManager: undoManager) { el in
+                    if case .shape(var d) = el.type {
+                        d.fillColor = nil
+                        el.type = .shape(d)
+                    }
+                }
+            } label: {
+                Image(systemName: "square.dashed")
+                    .font(.system(size: 12))
+                    .foregroundStyle(currentFill == nil ? .primary : .secondary)
+                    .frame(width: 22, height: 22)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("No Fill")
+
+            ForEach(CodableColor.palette.prefix(4), id: \.self) { color in
+                Button {
+                    document.updateElement(id: elementId, undoManager: undoManager) { el in
+                        if case .shape(var d) = el.type {
+                            d.fillColor = color
+                            el.type = .shape(d)
+                        }
+                    }
+                } label: {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(cgColor: color.cgColor))
+                        .frame(width: 14, height: 14)
+                        .overlay {
+                            if currentFill == color {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .strokeBorder(Color.primary, lineWidth: 1.5)
+                            }
+                        }
+                        .overlay {
+                            if color == .white {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 0.5)
+                            }
+                        }
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Dash Style
+
+    private func dashStyleButtons(current: DashStyle, onSelect: @escaping (DashStyle) -> Void) -> some View {
+        HStack(spacing: 1) {
+            ForEach(DashStyle.allCases, id: \.self) { style in
+                Button { onSelect(style) } label: {
+                    Image(systemName: style.systemImage)
+                        .font(.system(size: 11))
+                        .foregroundStyle(current == style ? .primary : .secondary)
+                        .frame(width: 26, height: 26)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(style.displayName)
+            }
+        }
+    }
+
+    // MARK: - Opacity
+
+    private func opacityButtons(elementId: UUID) -> some View {
+        Menu {
+            ForEach([1.0, 0.75, 0.5, 0.25], id: \.self) { value in
+                Button("\(Int(value * 100))%") {
+                    document.updateElement(id: elementId, undoManager: undoManager) { el in
+                        el.opacity = value
+                    }
+                }
+            }
+        } label: {
+            let current = selectedElements.first(where: { $0.id == elementId })?.opacity ?? 1.0
+            Image(systemName: current < 1.0 ? "circle.lefthalf.filled" : "circle.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .frame(width: 26, height: 26)
+                .contentShape(Rectangle())
+        }
+        .menuStyle(.borderlessButton)
+        .frame(width: 26)
+        .help("Opacity")
+    }
+
+    // MARK: - Lock
+
+    private func lockButton(elementId: UUID) -> some View {
+        let isLocked = selectedElements.first(where: { $0.id == elementId })?.locked ?? false
+        return Button {
+            document.toggleLock(ids: [elementId], undoManager: undoManager)
+        } label: {
+            Image(systemName: isLocked ? "lock.fill" : "lock.open")
+                .font(.system(size: 12))
+                .foregroundStyle(isLocked ? .primary : .secondary)
+                .frame(width: 26, height: 26)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(isLocked ? "Unlock" : "Lock")
+    }
+
+    private var lockAllButton: some View {
+        let anyLocked = selectedElements.contains { $0.locked }
+        return Button {
+            document.toggleLock(ids: toolManager.selectedElementIds, undoManager: undoManager)
+        } label: {
+            Image(systemName: anyLocked ? "lock.fill" : "lock.open")
+                .font(.system(size: 12))
+                .foregroundStyle(anyLocked ? .primary : .secondary)
+                .frame(width: 26, height: 26)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(anyLocked ? "Unlock All" : "Lock All")
+    }
+
+    // MARK: - Group
+
+    private var groupButton: some View {
+        let hasGroup = selectedElements.contains { $0.groupId != nil }
+        return Button {
+            if hasGroup {
+                document.ungroupElements(ids: toolManager.selectedElementIds, undoManager: undoManager)
+            } else {
+                document.groupElements(ids: toolManager.selectedElementIds, undoManager: undoManager)
+            }
+        } label: {
+            Image(systemName: hasGroup ? "rectangle.3.group" : "square.2.layers.3d.bottom.filled")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .frame(width: 26, height: 26)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(hasGroup ? "Ungroup" : "Group")
     }
 
     private func copyButton(elementId: UUID) -> some View {

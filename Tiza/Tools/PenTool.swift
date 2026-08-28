@@ -33,17 +33,31 @@ final class PenTool: Tool {
             return
         }
 
-        let smoothed = StrokeSmoothing.smooth(rawPoints)
-        let strokeData = StrokeData(
-            points: smoothed.map { [$0.x, $0.y] },
-            color: context.color,
-            thickness: context.thickness,
-            style: .pen
-        )
-
-        let zIndex = context.boardData?.nextZIndex ?? 0
-        let element = Element(type: .stroke(strokeData), zIndex: zIndex)
-        context.addElement(element)
+        if let shape = ShapeRecognizer.recognize(rawPoints) {
+            let shapeData = ShapeData(
+                shapeType: shape.type,
+                origin: [shape.bounds.origin.x, shape.bounds.origin.y],
+                size: [shape.bounds.width, shape.bounds.height],
+                rotation: 0,
+                strokeColor: context.color,
+                fillColor: nil,
+                strokeWidth: context.thickness
+            )
+            let zIndex = context.boardData?.nextZIndex ?? 0
+            let element = Element(type: .shape(shapeData), zIndex: zIndex)
+            context.addElement(element)
+        } else {
+            let smoothed = StrokeSmoothing.smooth(rawPoints)
+            let strokeData = StrokeData(
+                points: smoothed.map { [$0.x, $0.y] },
+                color: context.color,
+                thickness: context.thickness,
+                style: .pen
+            )
+            let zIndex = context.boardData?.nextZIndex ?? 0
+            let element = Element(type: .stroke(strokeData), zIndex: zIndex)
+            context.addElement(element)
+        }
 
         rawPoints = []
         manager.inProgressPoints = []

@@ -64,6 +64,12 @@ enum Renderer {
     static func drawElement(_ element: Element, in ctx: CGContext,
                              scale: CGFloat,
                              imageCache: [String: NSImage]) {
+        let hasOpacity = element.opacity < 1.0
+        if hasOpacity {
+            ctx.saveGState()
+            ctx.setAlpha(element.opacity)
+        }
+
         switch element.type {
         case .stroke(let data):
             drawStroke(data, in: ctx, scale: scale)
@@ -74,9 +80,43 @@ enum Renderer {
         case .image(let data):
             drawImage(data, in: ctx, scale: scale, imageCache: imageCache)
         }
+
+        if hasOpacity {
+            ctx.restoreGState()
+        }
+
+        if element.locked {
+            drawLockedIndicator(element, in: ctx, scale: scale)
+        }
     }
 
     // MARK: - In-Progress & Selection Overlays
+
+    static func drawSmartGuides(_ guides: [ToolManager.SmartGuide], in context: CGContext,
+                                 camera: Camera, viewSize: CGSize) {
+        guard !guides.isEmpty else { return }
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        context.setStrokeColor(NSColor.systemPink.withAlphaComponent(0.8).cgColor)
+        context.setLineWidth(0.5 / camera.scale)
+        context.setLineDash(phase: 0, lengths: [4 / camera.scale, 3 / camera.scale])
+
+        let extent: CGFloat = 50000
+        for guide in guides {
+            switch guide.orientation {
+            case .horizontal:
+                context.move(to: CGPoint(x: -extent, y: guide.position))
+                context.addLine(to: CGPoint(x: extent, y: guide.position))
+            case .vertical:
+                context.move(to: CGPoint(x: guide.position, y: -extent))
+                context.addLine(to: CGPoint(x: guide.position, y: extent))
+            }
+        }
+        context.strokePath()
+        context.restoreGState()
+    }
 
     static func drawInProgressStroke(points: [CGPoint], color: CodableColor, thickness: Double,
                                       style: StrokeStyle, in context: CGContext,
@@ -201,6 +241,40 @@ enum Renderer {
 
     // MARK: - Stroke
 
+    private static func drawLockedIndicator(_ element: Element, in ctx: CGContext, scale: CGFloat) {
+        let bounds = HitTesting.elementBounds(element)
+        let iconSize: CGFloat = 12 / scale
+        let x = bounds.maxX - iconSize - 2 / scale
+        let y = bounds.minY + 2 / scale
+
+        ctx.saveGState()
+        ctx.setAlpha(0.5)
+        ctx.setFillColor(NSColor.secondaryLabelColor.cgColor)
+
+        let bodyRect = CGRect(x: x + iconSize * 0.15, y: y + iconSize * 0.45,
+                              width: iconSize * 0.7, height: iconSize * 0.5)
+        ctx.fill(bodyRect)
+
+        ctx.setStrokeColor(NSColor.secondaryLabelColor.cgColor)
+        ctx.setLineWidth(1.5 / scale)
+        let shackle = CGRect(x: x + iconSize * 0.25, y: y + iconSize * 0.05,
+                             width: iconSize * 0.5, height: iconSize * 0.45)
+        ctx.strokeEllipse(in: shackle)
+
+        ctx.restoreGState()
+    }
+
+    private static func applyDashStyle(_ dashStyle: DashStyle, in ctx: CGContext, scale: CGFloat) {
+        switch dashStyle {
+        case .solid:
+            ctx.setLineDash(phase: 0, lengths: [])
+        case .dashed:
+            ctx.setLineDash(phase: 0, lengths: [8 / scale, 4 / scale])
+        case .dotted:
+            ctx.setLineDash(phase: 0, lengths: [2 / scale, 3 / scale])
+        }
+    }
+
     private static func drawStroke(_ data: StrokeData, in ctx: CGContext, scale: CGFloat) {
         guard data.points.count >= 2 else { return }
 
@@ -222,6 +296,8 @@ enum Renderer {
             ctx.setBlendMode(.normal)
             ctx.setLineWidth(lineWidth * 4)
         }
+
+        applyDashStyle(data.dashStyle, in: ctx, scale: scale)
 
         ctx.beginPath()
         ctx.move(to: CGPoint(x: data.points[0][0], y: data.points[0][1]))
@@ -249,6 +325,7 @@ enum Renderer {
         }
 
         ctx.setLineWidth(data.strokeWidth / scale)
+        applyDashStyle(data.dashStyle, in: ctx, scale: scale)
 
         switch data.shapeType {
         case .rectangle:
@@ -287,9 +364,69 @@ enum Renderer {
 
             drawArrowhead(at: end, from: start, in: ctx,
                           size: max(data.strokeWidth * 3 / scale, 8 / scale))
+
+        case .triangle:
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+            path.closeSubpath()
+            if let fill = data.fillColor {
+                ctx.setFillColor(fill.cgColor)
+                ctx.addPath(path)
+                ctx.fillPath()
+            }
+            ctx.setStrokeColor(data.strokeColor.cgColor)
+            ctx.addPath(path)
+            ctx.strokePath()
+
+        case .diamond:
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+            path.closeSubpath()
+            if let fill = data.fillColor {
+                ctx.setFillColor(fill.cgColor)
+                ctx.addPath(path)
+                ctx.fillPath()
+            }
+            ctx.setStrokeColor(data.strokeColor.cgColor)
+            ctx.addPath(path)
+            ctx.strokePath()
+
+        case .star:
+            let path = starPath(in: rect, points: 5)
+            if let fill = data.fillColor {
+                ctx.setFillColor(fill.cgColor)
+                ctx.addPath(path)
+                ctx.fillPath()
+            }
+            ctx.setStrokeColor(data.strokeColor.cgColor)
+            ctx.addPath(path)
+            ctx.strokePath()
         }
 
         ctx.restoreGState()
+    }
+
+    private static func starPath(in rect: CGRect, points: Int) -> CGPath {
+        let path = CGMutablePath()
+        let cx = rect.midX, cy = rect.midY
+        let outerR = min(rect.width, rect.height) / 2
+        let innerR = outerR * 0.38
+        let totalPoints = points * 2
+        let startAngle = -CGFloat.pi / 2
+
+        for i in 0..<totalPoints {
+            let angle = startAngle + CGFloat(i) * .pi / CGFloat(points)
+            let r = i.isMultiple(of: 2) ? outerR : innerR
+            let pt = CGPoint(x: cx + r * cos(angle), y: cy + r * sin(angle))
+            if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
+        }
+        path.closeSubpath()
+        return path
     }
 
     private static func drawArrowhead(at tip: CGPoint, from tail: CGPoint,

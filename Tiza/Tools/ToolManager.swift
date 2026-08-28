@@ -49,6 +49,16 @@ final class ToolManager: ObservableObject {
 
     var onNeedsRedraw: (() -> Void)?
 
+    var clipboard: [Element] = []
+
+    // Smart guides
+    struct SmartGuide {
+        enum Orientation { case horizontal, vertical }
+        let orientation: Orientation
+        let position: CGFloat
+    }
+    var activeSmartGuides: [SmartGuide] = []
+
     private var activeTool: (any Tool)?
     private var previousToolType: ToolType?
 
@@ -237,7 +247,8 @@ final class ToolManager: ObservableObject {
         case .highlighter: HighlighterTool(manager: self)
         case .eraser: EraserTool(manager: self)
         case .text: TextTool(manager: self)
-        case .line, .arrow, .rectangle, .ellipse: ShapeTool(type: type, manager: self)
+        case .line, .arrow, .rectangle, .ellipse, .triangle, .diamond, .star:
+            ShapeTool(type: type, manager: self)
         }
     }
 

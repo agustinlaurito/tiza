@@ -35,33 +35,46 @@ final class SelectionTool: Tool {
             let handleSize: CGFloat = 12
             if let handle = HitTesting.hitTestHandle(point: point, bounds: bounds,
                                                       handleSize: handleSize) {
-                dragMode = .resizing(handle: handle, originalBounds: bounds,
-                                     elementId: selectedId, start: point)
-                return
+                let el = board.elements.first { $0.id == selectedId }
+                if el?.locked != true {
+                    dragMode = .resizing(handle: handle, originalBounds: bounds,
+                                         elementId: selectedId, start: point)
+                    return
+                }
             }
         }
 
         if let hitElement = HitTesting.hitTest(point: point, elements: board.elements,
                                                 threshold: threshold) {
+            let groupExpanded = context.document.idsInSameGroup(as: [hitElement.id])
             if shift {
                 if manager.selectedElementIds.contains(hitElement.id) {
-                    manager.selectedElementIds.remove(hitElement.id)
+                    manager.selectedElementIds.subtract(groupExpanded)
                     dragMode = .none
                 } else {
-                    manager.selectedElementIds.insert(hitElement.id)
+                    manager.selectedElementIds.formUnion(groupExpanded)
+                    let anyLocked = board.elements.filter { manager.selectedElementIds.contains($0.id) }.contains { $0.locked }
+                    if !anyLocked {
+                        dragMode = .moving(start: point)
+                        manager.isMoving = true
+                        manager.moveDelta = .zero
+                    }
+                }
+            } else if manager.selectedElementIds.contains(hitElement.id) {
+                let anyLocked = board.elements.filter { manager.selectedElementIds.contains($0.id) }.contains { $0.locked }
+                if !anyLocked {
                     dragMode = .moving(start: point)
                     manager.isMoving = true
                     manager.moveDelta = .zero
                 }
-            } else if manager.selectedElementIds.contains(hitElement.id) {
-                dragMode = .moving(start: point)
-                manager.isMoving = true
-                manager.moveDelta = .zero
             } else {
-                manager.selectedElementIds = [hitElement.id]
-                dragMode = .moving(start: point)
-                manager.isMoving = true
-                manager.moveDelta = .zero
+                manager.selectedElementIds = groupExpanded
+                let anyLocked = board.elements.filter { groupExpanded.contains($0.id) }.contains { $0.locked }
+                if !anyLocked {
+                    dragMode = .moving(start: point)
+                    manager.isMoving = true
+                    manager.moveDelta = .zero
+                }
             }
         } else {
             selectionBeforeMarquee = shift ? manager.selectedElementIds : []
@@ -96,7 +109,10 @@ final class SelectionTool: Tool {
             }
 
         case .moving(let start):
-            let delta = point - start
+            var delta = point - start
+            if let board = context.boardData {
+                delta = snapWithSmartGuides(delta: delta, board: board)
+            }
             manager.moveDelta = delta
 
         case .resizing(let handle, let originalBounds, _, let start):
@@ -118,12 +134,13 @@ final class SelectionTool: Tool {
             manager.dragSelectionCrossing = false
 
         case .moving(let start):
-            let delta = point - start
+            let delta = manager.moveDelta
             if abs(delta.x) > 0.5 || abs(delta.y) > 0.5 {
                 context.moveElements(ids: manager.selectedElementIds, delta: delta)
             }
             manager.moveDelta = .zero
             manager.isMoving = false
+            manager.activeSmartGuides = []
 
         case .resizing(let handle, let originalBounds, let elementId, let start):
             let dx = point.x - start.x
@@ -146,6 +163,7 @@ final class SelectionTool: Tool {
         manager.moveDelta = .zero
         manager.isMoving = false
         manager.resizingBounds = nil
+        manager.activeSmartGuides = []
         dragMode = .none
     }
 
@@ -154,6 +172,66 @@ final class SelectionTool: Tool {
     private func rectFromPoints(_ a: CGPoint, _ b: CGPoint) -> CGRect {
         CGRect(x: min(a.x, b.x), y: min(a.y, b.y),
                width: abs(b.x - a.x), height: abs(b.y - a.y))
+    }
+
+    private func snapWithSmartGuides(delta: CGPoint, board: BoardData) -> CGPoint {
+        let selectedIds = manager.selectedElementIds
+        let selected = board.elements.filter { selectedIds.contains($0.id) }
+        let others = board.elements.filter { !selectedIds.contains($0.id) && !$0.locked }
+        guard !selected.isEmpty, !others.isEmpty else {
+            manager.activeSmartGuides = []
+            return delta
+        }
+
+        var combinedBounds = HitTesting.elementBounds(selected[0])
+        for el in selected.dropFirst() {
+            combinedBounds = combinedBounds.union(HitTesting.elementBounds(el))
+        }
+
+        let movedBounds = combinedBounds.offsetBy(dx: delta.x, dy: delta.y)
+        let snapThreshold: CGFloat = 5
+
+        var snapX: CGFloat? = nil
+        var snapY: CGFloat? = nil
+        var guides: [ToolManager.SmartGuide] = []
+
+        let movingEdgesX = [movedBounds.minX, movedBounds.midX, movedBounds.maxX]
+        let movingEdgesY = [movedBounds.minY, movedBounds.midY, movedBounds.maxY]
+
+        for other in others {
+            let ob = HitTesting.elementBounds(other)
+            let targetEdgesX = [ob.minX, ob.midX, ob.maxX]
+            let targetEdgesY = [ob.minY, ob.midY, ob.maxY]
+
+            for mx in movingEdgesX {
+                for tx in targetEdgesX {
+                    let dist = abs(mx - tx)
+                    if dist < snapThreshold {
+                        if snapX == nil || dist < abs(movingEdgesX[0] + (snapX! - delta.x) - tx) {
+                            snapX = delta.x + (tx - mx)
+                            guides.removeAll { $0.orientation == .vertical }
+                            guides.append(.init(orientation: .vertical, position: tx))
+                        }
+                    }
+                }
+            }
+
+            for my in movingEdgesY {
+                for ty in targetEdgesY {
+                    let dist = abs(my - ty)
+                    if dist < snapThreshold {
+                        if snapY == nil || dist < abs(movingEdgesY[0] + (snapY! - delta.y) - ty) {
+                            snapY = delta.y + (ty - my)
+                            guides.removeAll { $0.orientation == .horizontal }
+                            guides.append(.init(orientation: .horizontal, position: ty))
+                        }
+                    }
+                }
+            }
+        }
+
+        manager.activeSmartGuides = guides
+        return CGPoint(x: snapX ?? delta.x, y: snapY ?? delta.y)
     }
 
     private func computeResizedBounds(original: WorldRect, handle: HitTesting.HandlePosition,
