@@ -21,7 +21,7 @@
 Microsoft Whiteboard is being retired, so I built Tiza as a replacement — a fast, lightweight alternative that runs natively on macOS with no account, no subscription, and no cloud dependency. It's designed for screen sharing during live classes, but works just as well for sketching ideas or taking visual notes.
 
 <p align="center">
-  <img src="docs/screenshot-canvas.png" width="720" alt="Tiza canvas with Liquid Glass toolbar">
+  <img src="docs/demo.gif" width="720" alt="Tiza demo">
 </p>
 
 ## Features
