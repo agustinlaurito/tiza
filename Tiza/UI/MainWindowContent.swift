@@ -12,6 +12,8 @@ struct MainWindowContent: View {
     @State private var isHoveringToolbar = false
     @State private var hideTask: Task<Void, Never>?
     @State private var showContextMenu = false
+    @State private var keyDownMonitor: Any?
+    @State private var keyUpMonitor: Any?
 
     private let autoHideDelay: UInt64 = 3_000_000_000
 
@@ -29,17 +31,10 @@ struct MainWindowContent: View {
                     scheduleToolbarHide()
                 }
             }
-            .modifier(NotificationHandlers(
-                document: document,
-                toolManager: toolManager,
-                instrumentManager: instrumentManager,
-                presentationManager: presentationManager,
-                undoManager: undoManager,
-                exportPNG: exportPNG,
-                exportPDF: exportPDF,
-                zoomCanvas: zoomCanvas,
-                zoomToFit: zoomToFit
-            ))
+            .onDisappear {
+                removeKeyMonitors()
+            }
+            .focusedValue(\.commandHandler, handleCommand)
             .onChange(of: toolManager.selectedElementIds) {
                 if !toolManager.selectedElementIds.isEmpty {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
@@ -55,11 +50,13 @@ struct MainWindowContent: View {
 
     private var mainContent: some View {
         ZStack {
-            CanvasRepresentable(document: document, toolManager: toolManager,
-                                instrumentManager: instrumentManager,
-                                presentationManager: presentationManager,
-                                undoManager: undoManager)
-                .ignoresSafeArea()
+            GeometryReader { geo in
+                CanvasRepresentable(document: document, toolManager: toolManager,
+                                    instrumentManager: instrumentManager,
+                                    presentationManager: presentationManager,
+                                    undoManager: undoManager)
+                    .ignoresSafeArea()
+            }
 
             if showContextMenu, !showWelcome {
                 contextMenuOverlay
@@ -271,13 +268,25 @@ struct MainWindowContent: View {
     // MARK: - Keyboard
 
     private func installKeyMonitor() {
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        removeKeyMonitors()
+        keyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if handleKeyEvent(event) { return nil }
             return event
         }
-        NSEvent.addLocalMonitorForEvents(matching: .keyUp) { event in
+        keyUpMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyUp) { event in
             if handleKeyUpEvent(event) { return nil }
             return event
+        }
+    }
+
+    private func removeKeyMonitors() {
+        if let monitor = keyDownMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyDownMonitor = nil
+        }
+        if let monitor = keyUpMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyUpMonitor = nil
         }
     }
 
@@ -395,80 +404,53 @@ struct MainWindowContent: View {
     }
 }
 
-// MARK: - Notification Handlers
+// MARK: - Command Handler
 
-private struct NotificationHandlers: ViewModifier {
-    let document: TizaDocument
-    let toolManager: ToolManager
-    let instrumentManager: InstrumentManager
-    let presentationManager: PresentationManager
-    let undoManager: UndoManager?
-    let exportPNG: () -> Void
-    let exportPDF: () -> Void
-    let zoomCanvas: (CGFloat) -> Void
-    let zoomToFit: () -> Void
-
-    func body(content: Content) -> some View {
-        content
-            .onReceive(NotificationCenter.default.publisher(for: .addBoard)) { _ in
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    document.addBoard(undoManager: undoManager)
-                }
+extension MainWindowContent {
+    func handleCommand(_ command: AppCommand) {
+        switch command {
+        case .addBoard:
+            withAnimation(.easeInOut(duration: 0.15)) {
+                document.addBoard(undoManager: undoManager)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .duplicateBoard)) { _ in
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    document.duplicateBoard(at: document.model.activeBoardIndex,
-                                             undoManager: undoManager)
-                }
+        case .duplicateBoard:
+            withAnimation(.easeInOut(duration: 0.15)) {
+                document.duplicateBoard(at: document.model.activeBoardIndex,
+                                         undoManager: undoManager)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .deleteBoard)) { _ in
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    document.removeBoard(at: document.model.activeBoardIndex,
-                                          undoManager: undoManager)
-                }
+        case .deleteBoard:
+            withAnimation(.easeInOut(duration: 0.15)) {
+                document.removeBoard(at: document.model.activeBoardIndex,
+                                      undoManager: undoManager)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .nextBoard)) { _ in
-                withAnimation(.easeInOut(duration: 0.15)) { document.nextBoard() }
+        case .nextBoard:
+            withAnimation(.easeInOut(duration: 0.15)) { document.nextBoard() }
+        case .previousBoard:
+            withAnimation(.easeInOut(duration: 0.15)) { document.previousBoard() }
+        case .clearBoard:
+            document.clearBoard(undoManager: undoManager)
+        case .zoomIn:
+            zoomCanvas(by: 1.25)
+        case .zoomOut:
+            zoomCanvas(by: 0.8)
+        case .zoomFit:
+            zoomToFit()
+        case .switchTool(let toolType):
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                toolManager.switchTool(toolType)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .previousBoard)) { _ in
-                withAnimation(.easeInOut(duration: 0.15)) { document.previousBoard() }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .zoomIn)) { _ in
-                zoomCanvas(1.25)
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .zoomOut)) { _ in
-                zoomCanvas(0.8)
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .zoomFit)) { _ in
-                zoomToFit()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .switchTool)) { notification in
-                if let rawValue = notification.object as? String,
-                   let toolType = ToolType(rawValue: rawValue) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        toolManager.switchTool(toolType)
-                    }
-                }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .clearBoard)) { _ in
-                document.clearBoard(undoManager: undoManager)
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .toggleRuler)) { _ in
-                let center = document.activeBoardReference?.camera.camera.center ?? .zero
-                instrumentManager.toggleRuler(at: center)
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .toggleProtractor)) { _ in
-                let center = document.activeBoardReference?.camera.camera.center ?? .zero
-                instrumentManager.toggleProtractor(at: center)
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .toggleSpotlight)) { _ in
-                presentationManager.spotlightActive.toggle()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .exportPNG)) { _ in
-                exportPNG()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .exportPDF)) { _ in
-                exportPDF()
-            }
+        case .toggleRuler:
+            let center = document.activeBoardReference?.camera.camera.center ?? .zero
+            instrumentManager.toggleRuler(at: center)
+        case .toggleProtractor:
+            let center = document.activeBoardReference?.camera.camera.center ?? .zero
+            instrumentManager.toggleProtractor(at: center)
+        case .toggleSpotlight:
+            presentationManager.spotlightActive.toggle()
+        case .exportPNG:
+            exportPNG()
+        case .exportPDF:
+            exportPDF()
+        }
     }
 }

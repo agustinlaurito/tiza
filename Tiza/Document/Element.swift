@@ -24,6 +24,9 @@ enum ElementType: Codable, Equatable {
     case shape(ShapeData)
     case text(TextData)
     case image(ImageData)
+    case connector(ConnectorData)
+    case table(TableData)
+    case equation(EquationData)
 }
 
 enum StrokeStyle: String, Codable, Equatable {
@@ -59,6 +62,7 @@ struct StrokeData: Codable, Equatable {
     var thickness: Double
     var style: StrokeStyle
     var dashStyle: DashStyle = .solid
+    var pressures: [Double]?
 }
 
 enum ShapeType: String, Codable, Equatable {
@@ -151,6 +155,7 @@ struct TextData: Codable, Equatable {
     var rotation: Double
     var fontStyle: FontStyle = .system
     var underline: Bool = false
+    var width: Double?
 }
 
 enum AlignmentMode: String, CaseIterable {
@@ -188,4 +193,47 @@ struct ImageData: Codable, Equatable {
     var origin: [Double]
     var size: [Double]
     var rotation: Double
+}
+
+enum ConnectorLineType: String, Codable, Equatable {
+    case straight
+    case curved
+}
+
+struct ConnectorData: Codable, Equatable {
+    var sourceElementId: UUID?
+    var targetElementId: UUID?
+    var sourcePoint: [Double]
+    var targetPoint: [Double]
+    var strokeColor: CodableColor
+    var strokeWidth: Double
+    var dashStyle: DashStyle = .solid
+    var lineType: ConnectorLineType = .straight
+    var hasSourceArrow: Bool = false
+    var hasTargetArrow: Bool = true
+}
+
+struct TableData: Codable, Equatable {
+    var origin: [Double]
+    var rows: Int
+    var columns: Int
+    var cellWidth: Double = 100
+    var cellHeight: Double = 32
+    var cells: [[String]]
+    var strokeColor: CodableColor
+    var fontSize: Double = 14
+    var headerRow: Bool = false
+
+    static func empty(rows: Int, columns: Int, origin: [Double], color: CodableColor) -> TableData {
+        let cells = Array(repeating: Array(repeating: "", count: columns), count: rows)
+        return TableData(origin: origin, rows: rows, columns: columns,
+                         cells: cells, strokeColor: color)
+    }
+}
+
+struct EquationData: Codable, Equatable {
+    var position: [Double]
+    var latex: String
+    var fontSize: Double
+    var color: CodableColor
 }

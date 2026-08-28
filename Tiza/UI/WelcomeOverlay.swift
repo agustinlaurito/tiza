@@ -9,6 +9,7 @@ struct WelcomeOverlay: View {
     @State private var showTitle = false
     @State private var showSubtitle = false
     @State private var showButtons = false
+    @State private var recentFiles: [URL] = []
 
     var body: some View {
         ZStack {
@@ -63,6 +64,40 @@ struct WelcomeOverlay: View {
                     .frame(width: 220)
                     .opacity(showButtons ? 1.0 : 0)
                     .offset(y: showButtons ? 0 : 10)
+
+                    if !recentFiles.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Recent")
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .foregroundStyle(.secondary)
+                                .padding(.leading, 4)
+
+                            ForEach(recentFiles.prefix(5), id: \.absoluteString) { url in
+                                Button {
+                                    NSDocumentController.shared.openDocument(
+                                        withContentsOf: url, display: true
+                                    ) { _, _, _ in }
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "doc")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(.secondary)
+                                        Text(url.deletingPathExtension().lastPathComponent)
+                                            .font(.system(size: 13, design: .rounded))
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .frame(width: 220)
+                        .opacity(showButtons ? 1.0 : 0)
+                    }
                 }
                 .padding(32)
                 .glassEffect(.regular, in: .rect(cornerRadius: 20))
@@ -73,6 +108,9 @@ struct WelcomeOverlay: View {
             .opacity(showCard ? 1.0 : 0)
         }
         .onAppear {
+            recentFiles = NSDocumentController.shared.recentDocumentURLs
+                .filter { $0.pathExtension == "tiza" }
+
             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
                 showCard = true
             }

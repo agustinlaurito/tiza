@@ -92,6 +92,8 @@ struct ElementContextMenu: View {
             textMenu(elementId: element.id, data: data)
         case .image:
             imageMenu(elementId: element.id)
+        case .connector, .table, .equation:
+            commonMenu(elementId: element.id)
         }
     }
 
@@ -236,6 +238,18 @@ struct ElementContextMenu: View {
     }
 
     private func imageMenu(elementId: UUID) -> some View {
+        HStack(spacing: 4) {
+            scaleButtons(elementId: elementId)
+            menuDivider
+            opacityButtons(elementId: elementId)
+            lockButton(elementId: elementId)
+            menuDivider
+            copyButton(elementId: elementId)
+            deleteButton(elementId: elementId)
+        }
+    }
+
+    private func commonMenu(elementId: UUID) -> some View {
         HStack(spacing: 4) {
             scaleButtons(elementId: elementId)
             menuDivider

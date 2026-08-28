@@ -31,6 +31,12 @@ enum HitTesting {
             return textHitTest(point: point, data: data)
         case .image(let data):
             return imageHitTest(point: point, data: data)
+        case .connector(let data):
+            return connectorHitTest(point: point, data: data, threshold: threshold)
+        case .table(let data):
+            return tableHitTest(point: point, data: data)
+        case .equation(let data):
+            return equationHitTest(point: point, data: data)
         }
     }
 
@@ -97,6 +103,33 @@ enum HitTesting {
         return rect.contains(point)
     }
 
+    // MARK: - Connector
+
+    private static func connectorHitTest(point: WorldPoint, data: ConnectorData,
+                                          threshold: CGFloat) -> Bool {
+        let a = CGPoint(x: data.sourcePoint[0], y: data.sourcePoint[1])
+        let b = CGPoint(x: data.targetPoint[0], y: data.targetPoint[1])
+        return distanceToSegment(point: point, a: a, b: b) < threshold + data.strokeWidth / 2
+    }
+
+    // MARK: - Table
+
+    private static func tableHitTest(point: WorldPoint, data: TableData) -> Bool {
+        let w = Double(data.columns) * data.cellWidth
+        let h = Double(data.rows) * data.cellHeight
+        let rect = CGRect(x: data.origin[0], y: data.origin[1], width: w, height: h)
+        return rect.contains(point)
+    }
+
+    // MARK: - Equation
+
+    private static func equationHitTest(point: WorldPoint, data: EquationData) -> Bool {
+        let bounds = CGRect(x: data.position[0], y: data.position[1] - data.fontSize * 1.4,
+                            width: max(CGFloat(data.latex.count) * data.fontSize * 0.55, 30),
+                            height: data.fontSize * 1.6)
+        return bounds.contains(point)
+    }
+
     // MARK: - Rect intersection
 
     private static func elementIntersectsRect(element: Element, rect: WorldRect) -> Bool {
@@ -124,6 +157,12 @@ enum HitTesting {
                           width: data.size[0], height: data.size[1])
 
         case .text(let data):
+            if let width = data.width {
+                let lines = max(ceil(CGFloat(data.content.count) * data.fontSize * 0.6 / width), 1)
+                let h = data.fontSize * 1.4 * lines
+                return CGRect(x: data.position[0], y: data.position[1] - data.fontSize * 1.4,
+                              width: width, height: h)
+            }
             let w = max(CGFloat(data.content.count) * data.fontSize * 0.6, 20)
             return CGRect(x: data.position[0], y: data.position[1] - data.fontSize * 1.4,
                           width: w, height: data.fontSize * 1.4)
@@ -131,6 +170,23 @@ enum HitTesting {
         case .image(let data):
             return CGRect(x: data.origin[0], y: data.origin[1],
                           width: data.size[0], height: data.size[1])
+
+        case .connector(let data):
+            let x1 = data.sourcePoint[0], y1 = data.sourcePoint[1]
+            let x2 = data.targetPoint[0], y2 = data.targetPoint[1]
+            let pad = max(data.strokeWidth, 4.0)
+            return CGRect(x: min(x1, x2) - pad, y: min(y1, y2) - pad,
+                          width: abs(x2 - x1) + pad * 2, height: abs(y2 - y1) + pad * 2)
+
+        case .table(let data):
+            let w = Double(data.columns) * data.cellWidth
+            let h = Double(data.rows) * data.cellHeight
+            return CGRect(x: data.origin[0], y: data.origin[1], width: w, height: h)
+
+        case .equation(let data):
+            let w = max(CGFloat(data.latex.count) * data.fontSize * 0.55, 30)
+            return CGRect(x: data.position[0], y: data.position[1] - data.fontSize * 1.4,
+                          width: w, height: data.fontSize * 1.6)
         }
     }
 

@@ -2,6 +2,7 @@ import AppKit
 
 enum ToolType: String, CaseIterable, Identifiable {
     case select, pen, highlighter, eraser, text, line, arrow, rectangle, ellipse, triangle, diamond, star
+    case connector, table, equation
 
     var id: String { rawValue }
 
@@ -19,6 +20,9 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .triangle: "Triangle"
         case .diamond: "Diamond"
         case .star: "Star"
+        case .connector: "Connector"
+        case .table: "Table"
+        case .equation: "Equation"
         }
     }
 
@@ -36,6 +40,9 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .triangle: "triangle"
         case .diamond: "diamond"
         case .star: "star"
+        case .connector: "arrow.triangle.branch"
+        case .table: "tablecells"
+        case .equation: "function"
         }
     }
 
@@ -53,10 +60,20 @@ enum ToolType: String, CaseIterable, Identifiable {
         case .triangle: "g"
         case .diamond: "d"
         case .star: "s"
+        case .connector: "c"
+        case .table: "b"
+        case .equation: "q"
         }
     }
 
     static let drawingTools: [ToolType] = allCases
+
+    static let primaryTools: [ToolType] = [.select, .pen, .highlighter, .eraser, .text]
+    static let shapeTools: [ToolType] = [.line, .arrow, .rectangle, .ellipse, .triangle, .diamond, .star]
+    static let insertTools: [ToolType] = [.connector, .table, .equation]
+
+    var isShapeTool: Bool { Self.shapeTools.contains(self) }
+    var isInsertTool: Bool { Self.insertTools.contains(self) }
 }
 
 protocol Tool: AnyObject {

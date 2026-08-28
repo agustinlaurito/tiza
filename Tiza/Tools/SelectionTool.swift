@@ -178,17 +178,26 @@ final class SelectionTool: Tool {
         let selectedIds = manager.selectedElementIds
         let selected = board.elements.filter { selectedIds.contains($0.id) }
         let others = board.elements.filter { !selectedIds.contains($0.id) && !$0.locked }
-        guard !selected.isEmpty, !others.isEmpty else {
-            manager.activeSmartGuides = []
-            return delta
-        }
 
         var combinedBounds = HitTesting.elementBounds(selected[0])
         for el in selected.dropFirst() {
             combinedBounds = combinedBounds.union(HitTesting.elementBounds(el))
         }
-
         let movedBounds = combinedBounds.offsetBy(dx: delta.x, dy: delta.y)
+
+        let bg = manager.currentBackground
+        if (bg == .grid || bg == .dottedGrid), others.isEmpty {
+            return snapToGrid(delta: delta, movedBounds: movedBounds, spacing: 20)
+        }
+
+        guard !selected.isEmpty, !others.isEmpty else {
+            if bg == .grid || bg == .dottedGrid {
+                return snapToGrid(delta: delta, movedBounds: movedBounds, spacing: 20)
+            }
+            manager.activeSmartGuides = []
+            return delta
+        }
+
         let snapThreshold: CGFloat = 5
 
         var snapX: CGFloat? = nil
@@ -231,7 +240,30 @@ final class SelectionTool: Tool {
         }
 
         manager.activeSmartGuides = guides
-        return CGPoint(x: snapX ?? delta.x, y: snapY ?? delta.y)
+        var result = CGPoint(x: snapX ?? delta.x, y: snapY ?? delta.y)
+
+        if bg == .grid || bg == .dottedGrid {
+            let gridSnapped = snapToGrid(delta: result, movedBounds: combinedBounds.offsetBy(dx: result.x, dy: result.y), spacing: 20)
+            if snapX == nil { result.x = gridSnapped.x }
+            if snapY == nil { result.y = gridSnapped.y }
+        }
+
+        return result
+    }
+
+    private func snapToGrid(delta: CGPoint, movedBounds: CGRect, spacing: CGFloat) -> CGPoint {
+        let snapThreshold: CGFloat = spacing / 3
+        var dx = delta.x, dy = delta.y
+
+        let nearestX = round(movedBounds.minX / spacing) * spacing
+        if abs(movedBounds.minX - nearestX) < snapThreshold {
+            dx += nearestX - movedBounds.minX
+        }
+        let nearestY = round(movedBounds.minY / spacing) * spacing
+        if abs(movedBounds.minY - nearestY) < snapThreshold {
+            dy += nearestY - movedBounds.minY
+        }
+        return CGPoint(x: dx, y: dy)
     }
 
     private func computeResizedBounds(original: WorldRect, handle: HitTesting.HandlePosition,

@@ -7,12 +7,15 @@ final class ToolManager: ObservableObject {
     @Published var currentColor: CodableColor = .black
     @Published var currentThickness: Double = 2.0
     @Published var selectedElementIds: Set<UUID> = []
+    @Published var lastShapeTool: ToolType = .rectangle
+    @Published var lastInsertTool: ToolType = .table
 
     // In-progress stroke state (high-frequency, not @Published)
     var inProgressPoints: [CGPoint] = []
     var inProgressColor: CodableColor = .black
     var inProgressThickness: Double = 2.0
     var inProgressStyle: StrokeStyle = .pen
+    var inProgressPressures: [Double]?
 
     // In-progress shape state
     var inProgressShapeType: ShapeType?
@@ -20,6 +23,14 @@ final class ToolManager: ObservableObject {
     var inProgressShapeSize: CGSize = .zero
     var inProgressShapeColor: CodableColor = .black
     var inProgressShapeThickness: Double = 2.0
+
+    // In-progress connector state
+    var inProgressConnectorSource: CGPoint?
+    var inProgressConnectorTarget: CGPoint?
+    var inProgressConnectorColor: CodableColor = .black
+
+    var lastEventPressure: Double = 1.0
+    var currentBackground: BoardBackground = .white
 
     // Selection state
     var dragSelectionRect: WorldRect?
@@ -32,22 +43,15 @@ final class ToolManager: ObservableObject {
     var textEditingPosition: WorldPoint?
     var textPreset: TextPreset?
 
-    // Delete animation state
-    struct DeletingElement {
-        let element: Element
-        let center: CGPoint
-        let startTime: CFTimeInterval
-        var progress: CGFloat
+    // Equation editing state
+    var equationEditingPosition: WorldPoint?
+
+    let animator = CanvasAnimator()
+
+    var onNeedsRedraw: (() -> Void)? {
+        get { animator.onNeedsRedraw }
+        set { animator.onNeedsRedraw = newValue }
     }
-    var deletingElements: [DeletingElement] = []
-    private var deleteAnimationTimer: Timer?
-
-    // Alignment animation state
-    var animatingOffsets: [UUID: CGPoint] = [:]
-    private var alignAnimationTimer: Timer?
-    private var alignInitialDeltas: [UUID: CGPoint] = [:]
-
-    var onNeedsRedraw: (() -> Void)?
 
     var clipboard: [Element] = []
 
@@ -67,7 +71,7 @@ final class ToolManager: ObservableObject {
     }
 
     func switchTool(_ type: ToolType) {
-        if type == .text && activeToolType != .text {
+        if (type == .text || type == .equation || type == .table) && activeToolType != type {
             previousToolType = activeToolType
         }
 
@@ -76,6 +80,12 @@ final class ToolManager: ObservableObject {
 
         activeToolType = type
         activeTool = createTool(type)
+
+        if type.isShapeTool {
+            lastShapeTool = type
+        } else if type.isInsertTool {
+            lastInsertTool = type
+        }
 
         if type != .select {
             selectedElementIds = []
@@ -111,115 +121,21 @@ final class ToolManager: ObservableObject {
 
     func deleteSelection(context: ToolContext) {
         guard !selectedElementIds.isEmpty else { return }
-        deleteElementsAnimated(ids: selectedElementIds,
-                               document: context.document,
-                               undoManager: context.undoManager)
+        animator.deleteElementsAnimated(ids: selectedElementIds,
+                                        document: context.document,
+                                        undoManager: context.undoManager)
+        selectedElementIds.subtract(selectedElementIds)
     }
 
     func deleteElementsAnimated(ids: Set<UUID>, document: TizaDocument, undoManager: UndoManager?) {
-        guard let board = document.activeBoardData else { return }
-        let selected = board.elements.filter { ids.contains($0.id) }
-        guard !selected.isEmpty else { return }
-
-        let now = CACurrentMediaTime()
-        deletingElements.append(contentsOf: selected.map { element in
-            let bounds = HitTesting.elementBounds(element)
-            return DeletingElement(element: element,
-                                   center: CGPoint(x: bounds.midX, y: bounds.midY),
-                                   startTime: now, progress: 0)
-        })
-
         selectedElementIds.subtract(ids)
-
-        undoManager?.beginUndoGrouping()
-        for id in ids {
-            document.removeElement(id: id, undoManager: undoManager)
-        }
-        undoManager?.endUndoGrouping()
-
-        startDeleteAnimation()
-    }
-
-    private func startDeleteAnimation() {
-        guard deleteAnimationTimer == nil else { return }
-        let duration: CFTimeInterval = 0.2
-
-        deleteAnimationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
-            guard let self else { timer.invalidate(); return }
-            let now = CACurrentMediaTime()
-
-            for i in self.deletingElements.indices {
-                let elapsed = now - self.deletingElements[i].startTime
-                self.deletingElements[i].progress = min(CGFloat(elapsed / duration), 1.0)
-            }
-
-            self.deletingElements.removeAll { $0.progress >= 1.0 }
-            self.onNeedsRedraw?()
-
-            if self.deletingElements.isEmpty {
-                timer.invalidate()
-                self.deleteAnimationTimer = nil
-            }
-        }
+        animator.deleteElementsAnimated(ids: ids, document: document, undoManager: undoManager)
     }
 
     func alignElementsAnimated(ids: Set<UUID>, alignment: AlignmentMode,
                                 document: TizaDocument, undoManager: UndoManager?) {
-        guard let board = document.activeBoardData else { return }
-
-        var oldCenters: [UUID: CGPoint] = [:]
-        for element in board.elements where ids.contains(element.id) {
-            let bounds = HitTesting.elementBounds(element)
-            oldCenters[element.id] = CGPoint(x: bounds.midX, y: bounds.midY)
-        }
-
-        document.alignElements(ids: ids, alignment: alignment, undoManager: undoManager)
-
-        guard let newBoard = document.activeBoardData else { return }
-        var deltas: [UUID: CGPoint] = [:]
-        for element in newBoard.elements where ids.contains(element.id) {
-            let newBounds = HitTesting.elementBounds(element)
-            let newCenter = CGPoint(x: newBounds.midX, y: newBounds.midY)
-            if let oldCenter = oldCenters[element.id] {
-                let dx = oldCenter.x - newCenter.x
-                let dy = oldCenter.y - newCenter.y
-                if abs(dx) > 0.5 || abs(dy) > 0.5 {
-                    deltas[element.id] = CGPoint(x: dx, y: dy)
-                }
-            }
-        }
-
-        guard !deltas.isEmpty else { return }
-
-        alignAnimationTimer?.invalidate()
-        alignInitialDeltas = deltas
-        animatingOffsets = deltas
-
-        let startTime = CACurrentMediaTime()
-        let duration: CFTimeInterval = 0.3
-
-        alignAnimationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
-            guard let self else { timer.invalidate(); return }
-            let elapsed = CACurrentMediaTime() - startTime
-            let progress = min(CGFloat(elapsed / duration), 1.0)
-            let eased = 1.0 - pow(1.0 - progress, 3)
-
-            var newOffsets: [UUID: CGPoint] = [:]
-            for (id, delta) in self.alignInitialDeltas {
-                newOffsets[id] = CGPoint(x: delta.x * (1.0 - eased),
-                                        y: delta.y * (1.0 - eased))
-            }
-            self.animatingOffsets = newOffsets
-            self.onNeedsRedraw?()
-
-            if progress >= 1.0 {
-                timer.invalidate()
-                self.alignAnimationTimer = nil
-                self.animatingOffsets = [:]
-                self.alignInitialDeltas = [:]
-                self.onNeedsRedraw?()
-            }
-        }
+        animator.alignElementsAnimated(ids: ids, alignment: alignment,
+                                       document: document, undoManager: undoManager)
     }
 
     func selectionBounds(in board: BoardData) -> WorldRect? {
@@ -247,6 +163,9 @@ final class ToolManager: ObservableObject {
         case .highlighter: HighlighterTool(manager: self)
         case .eraser: EraserTool(manager: self)
         case .text: TextTool(manager: self)
+        case .connector: ConnectorTool(manager: self)
+        case .table: TableTool(manager: self)
+        case .equation: EquationTool(manager: self)
         case .line, .arrow, .rectangle, .ellipse, .triangle, .diamond, .star:
             ShapeTool(type: type, manager: self)
         }
@@ -254,12 +173,16 @@ final class ToolManager: ObservableObject {
 
     private func clearTransientState() {
         inProgressPoints = []
+        inProgressPressures = nil
         inProgressShapeType = nil
+        inProgressConnectorSource = nil
+        inProgressConnectorTarget = nil
         dragSelectionRect = nil
         dragSelectionCrossing = false
         moveDelta = .zero
         isMoving = false
         resizingBounds = nil
         textEditingPosition = nil
+        equationEditingPosition = nil
     }
 }

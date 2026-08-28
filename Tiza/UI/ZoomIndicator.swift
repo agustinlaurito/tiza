@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ZoomIndicator: View {
     @ObservedObject var document: TizaDocument
+    @FocusedValue(\.commandHandler) private var commandHandler
     @Namespace private var zoomNamespace
 
     private var zoomPercent: Int {
@@ -12,7 +13,7 @@ struct ZoomIndicator: View {
     var body: some View {
         HStack(spacing: 4) {
             Button {
-                NotificationCenter.default.post(name: .zoomOut, object: nil)
+                commandHandler?(.zoomOut)
             } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .medium))
@@ -26,7 +27,7 @@ struct ZoomIndicator: View {
             .help("Zoom Out (⌘-)")
 
             Button {
-                NotificationCenter.default.post(name: .zoomFit, object: nil)
+                commandHandler?(.zoomFit)
             } label: {
                 Text("\(zoomPercent)%")
                     .font(.system(size: 11, weight: .medium, design: .rounded))
@@ -42,7 +43,7 @@ struct ZoomIndicator: View {
             .help("Fit Content (⌘0)")
 
             Button {
-                NotificationCenter.default.post(name: .zoomIn, object: nil)
+                commandHandler?(.zoomIn)
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 11, weight: .medium))

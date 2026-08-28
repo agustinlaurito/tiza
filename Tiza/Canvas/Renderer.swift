@@ -37,7 +37,7 @@ enum Renderer {
         context.restoreGState()
     }
 
-    static func drawDeletingElements(_ elements: [ToolManager.DeletingElement],
+    static func drawDeletingElements(_ elements: [CanvasAnimator.DeletingElement],
                                       in context: CGContext, camera: Camera,
                                       viewSize: CGSize, imageCache: [String: NSImage] = [:]) {
         let transform = camera.affineTransform(for: viewSize)
@@ -79,6 +79,12 @@ enum Renderer {
             drawText(data, in: ctx, scale: scale)
         case .image(let data):
             drawImage(data, in: ctx, scale: scale, imageCache: imageCache)
+        case .connector(let data):
+            drawConnector(data, in: ctx, scale: scale)
+        case .table(let data):
+            drawTable(data, in: ctx, scale: scale)
+        case .equation(let data):
+            drawEquation(data, in: ctx, scale: scale)
         }
 
         if hasOpacity {
@@ -212,297 +218,26 @@ enum Renderer {
         context.restoreGState()
     }
 
-    // MARK: - Image
+    static func drawInProgressConnector(source: CGPoint, target: CGPoint, color: CodableColor,
+                                         in context: CGContext, camera: Camera, viewSize: CGSize) {
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
 
-    private static func drawImage(_ data: ImageData, in ctx: CGContext, scale: CGFloat,
-                                    imageCache: [String: NSImage]) {
-        guard let image = imageCache[data.assetId],
-              let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+        context.setStrokeColor(color.cgColor)
+        context.setFillColor(color.cgColor)
+        context.setLineWidth(2.0 / camera.scale)
+        context.setLineCap(.round)
+        context.setLineDash(phase: 0, lengths: [6 / camera.scale, 3 / camera.scale])
 
-        let origin = CGPoint(x: data.origin[0], y: data.origin[1])
-        let size = CGSize(width: data.size[0], height: data.size[1])
+        context.beginPath()
+        context.move(to: source)
+        context.addLine(to: target)
+        context.strokePath()
 
-        ctx.saveGState()
+        drawArrowhead(at: target, from: source, in: context,
+                      size: 8 / camera.scale)
 
-        if data.rotation != 0 {
-            let cx = origin.x + size.width / 2
-            let cy = origin.y + size.height / 2
-            ctx.translateBy(x: cx, y: cy)
-            ctx.rotate(by: data.rotation)
-            ctx.translateBy(x: -cx, y: -cy)
-        }
-
-        ctx.translateBy(x: origin.x, y: origin.y + size.height)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(cgImage, in: CGRect(origin: .zero, size: size))
-
-        ctx.restoreGState()
-    }
-
-    // MARK: - Stroke
-
-    private static func drawLockedIndicator(_ element: Element, in ctx: CGContext, scale: CGFloat) {
-        let bounds = HitTesting.elementBounds(element)
-        let iconSize: CGFloat = 12 / scale
-        let x = bounds.maxX - iconSize - 2 / scale
-        let y = bounds.minY + 2 / scale
-
-        ctx.saveGState()
-        ctx.setAlpha(0.5)
-        ctx.setFillColor(NSColor.secondaryLabelColor.cgColor)
-
-        let bodyRect = CGRect(x: x + iconSize * 0.15, y: y + iconSize * 0.45,
-                              width: iconSize * 0.7, height: iconSize * 0.5)
-        ctx.fill(bodyRect)
-
-        ctx.setStrokeColor(NSColor.secondaryLabelColor.cgColor)
-        ctx.setLineWidth(1.5 / scale)
-        let shackle = CGRect(x: x + iconSize * 0.25, y: y + iconSize * 0.05,
-                             width: iconSize * 0.5, height: iconSize * 0.45)
-        ctx.strokeEllipse(in: shackle)
-
-        ctx.restoreGState()
-    }
-
-    private static func applyDashStyle(_ dashStyle: DashStyle, in ctx: CGContext, scale: CGFloat) {
-        switch dashStyle {
-        case .solid:
-            ctx.setLineDash(phase: 0, lengths: [])
-        case .dashed:
-            ctx.setLineDash(phase: 0, lengths: [8 / scale, 4 / scale])
-        case .dotted:
-            ctx.setLineDash(phase: 0, lengths: [2 / scale, 3 / scale])
-        }
-    }
-
-    private static func drawStroke(_ data: StrokeData, in ctx: CGContext, scale: CGFloat) {
-        guard data.points.count >= 2 else { return }
-
-        ctx.saveGState()
-
-        let lineWidth = data.thickness / scale
-        ctx.setLineWidth(lineWidth)
-        ctx.setLineCap(.round)
-        ctx.setLineJoin(.round)
-
-        switch data.style {
-        case .pen:
-            ctx.setStrokeColor(data.color.cgColor)
-            ctx.setBlendMode(.normal)
-        case .highlighter:
-            var color = data.color
-            color.a = 0.35
-            ctx.setStrokeColor(color.cgColor)
-            ctx.setBlendMode(.normal)
-            ctx.setLineWidth(lineWidth * 4)
-        }
-
-        applyDashStyle(data.dashStyle, in: ctx, scale: scale)
-
-        ctx.beginPath()
-        ctx.move(to: CGPoint(x: data.points[0][0], y: data.points[0][1]))
-        for i in 1..<data.points.count {
-            ctx.addLine(to: CGPoint(x: data.points[i][0], y: data.points[i][1]))
-        }
-        ctx.strokePath()
-
-        ctx.restoreGState()
-    }
-
-    private static func drawShape(_ data: ShapeData, in ctx: CGContext, scale: CGFloat) {
-        ctx.saveGState()
-
-        let origin = CGPoint(x: data.origin[0], y: data.origin[1])
-        let size = CGSize(width: data.size[0], height: data.size[1])
-        let rect = CGRect(origin: origin, size: size)
-
-        if data.rotation != 0 {
-            let cx = origin.x + size.width / 2
-            let cy = origin.y + size.height / 2
-            ctx.translateBy(x: cx, y: cy)
-            ctx.rotate(by: data.rotation)
-            ctx.translateBy(x: -cx, y: -cy)
-        }
-
-        ctx.setLineWidth(data.strokeWidth / scale)
-        applyDashStyle(data.dashStyle, in: ctx, scale: scale)
-
-        switch data.shapeType {
-        case .rectangle:
-            if let fill = data.fillColor {
-                ctx.setFillColor(fill.cgColor)
-                ctx.fill(rect)
-            }
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.stroke(rect)
-
-        case .ellipse:
-            if let fill = data.fillColor {
-                ctx.setFillColor(fill.cgColor)
-                ctx.fillEllipse(in: rect)
-            }
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.strokeEllipse(in: rect)
-
-        case .line:
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.setLineCap(.round)
-            ctx.move(to: origin)
-            ctx.addLine(to: CGPoint(x: origin.x + size.width, y: origin.y + size.height))
-            ctx.strokePath()
-
-        case .arrow:
-            let start = origin
-            let end = CGPoint(x: origin.x + size.width, y: origin.y + size.height)
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.setFillColor(data.strokeColor.cgColor)
-            ctx.setLineCap(.round)
-
-            ctx.move(to: start)
-            ctx.addLine(to: end)
-            ctx.strokePath()
-
-            drawArrowhead(at: end, from: start, in: ctx,
-                          size: max(data.strokeWidth * 3 / scale, 8 / scale))
-
-        case .triangle:
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-            path.closeSubpath()
-            if let fill = data.fillColor {
-                ctx.setFillColor(fill.cgColor)
-                ctx.addPath(path)
-                ctx.fillPath()
-            }
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.addPath(path)
-            ctx.strokePath()
-
-        case .diamond:
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-            path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
-            path.closeSubpath()
-            if let fill = data.fillColor {
-                ctx.setFillColor(fill.cgColor)
-                ctx.addPath(path)
-                ctx.fillPath()
-            }
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.addPath(path)
-            ctx.strokePath()
-
-        case .star:
-            let path = starPath(in: rect, points: 5)
-            if let fill = data.fillColor {
-                ctx.setFillColor(fill.cgColor)
-                ctx.addPath(path)
-                ctx.fillPath()
-            }
-            ctx.setStrokeColor(data.strokeColor.cgColor)
-            ctx.addPath(path)
-            ctx.strokePath()
-        }
-
-        ctx.restoreGState()
-    }
-
-    private static func starPath(in rect: CGRect, points: Int) -> CGPath {
-        let path = CGMutablePath()
-        let cx = rect.midX, cy = rect.midY
-        let outerR = min(rect.width, rect.height) / 2
-        let innerR = outerR * 0.38
-        let totalPoints = points * 2
-        let startAngle = -CGFloat.pi / 2
-
-        for i in 0..<totalPoints {
-            let angle = startAngle + CGFloat(i) * .pi / CGFloat(points)
-            let r = i.isMultiple(of: 2) ? outerR : innerR
-            let pt = CGPoint(x: cx + r * cos(angle), y: cy + r * sin(angle))
-            if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
-        }
-        path.closeSubpath()
-        return path
-    }
-
-    private static func drawArrowhead(at tip: CGPoint, from tail: CGPoint,
-                                       in ctx: CGContext, size: CGFloat) {
-        let angle = atan2(tip.y - tail.y, tip.x - tail.x)
-        let spread: CGFloat = .pi / 6
-
-        let p1 = CGPoint(
-            x: tip.x - size * cos(angle - spread),
-            y: tip.y - size * sin(angle - spread)
-        )
-        let p2 = CGPoint(
-            x: tip.x - size * cos(angle + spread),
-            y: tip.y - size * sin(angle + spread)
-        )
-
-        ctx.beginPath()
-        ctx.move(to: tip)
-        ctx.addLine(to: p1)
-        ctx.addLine(to: p2)
-        ctx.closePath()
-        ctx.fillPath()
-    }
-
-    static func fontForTextData(_ data: TextData, scale: CGFloat) -> NSFont {
-        let fontSize = data.fontSize / scale
-        let weight: NSFont.Weight = data.bold ? .bold : .regular
-
-        let baseFont = NSFont.systemFont(ofSize: fontSize, weight: weight)
-
-        let design: NSFontDescriptor.SystemDesign
-        switch data.fontStyle {
-        case .system: design = .default
-        case .serif: design = .serif
-        case .rounded: design = .rounded
-        }
-
-        if let descriptor = baseFont.fontDescriptor.withDesign(design) {
-            return NSFont(descriptor: descriptor, size: fontSize) ?? baseFont
-        }
-        return baseFont
-    }
-
-    private static func drawText(_ data: TextData, in ctx: CGContext, scale: CGFloat) {
-        let position = CGPoint(x: data.position[0], y: data.position[1])
-
-        ctx.saveGState()
-
-        if data.rotation != 0 {
-            ctx.translateBy(x: position.x, y: position.y)
-            ctx.rotate(by: data.rotation)
-            ctx.translateBy(x: -position.x, y: -position.y)
-        }
-
-        let font = fontForTextData(data, scale: scale)
-
-        var attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: data.color.nsColor
-        ]
-        if data.underline {
-            attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            attributes[.underlineColor] = data.color.nsColor
-        }
-
-        let string = NSAttributedString(string: data.content, attributes: attributes)
-        let line = CTLineCreateWithAttributedString(string)
-
-        ctx.textPosition = position
-        ctx.saveGState()
-        ctx.translateBy(x: position.x, y: position.y)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.textPosition = .zero
-        CTLineDraw(line, ctx)
-        ctx.restoreGState()
-
-        ctx.restoreGState()
+        context.restoreGState()
     }
 }

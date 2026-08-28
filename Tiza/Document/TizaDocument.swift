@@ -15,6 +15,7 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
     @Published var boardDataMap: [UUID: BoardData]
     var imageCache: [String: NSImage] = [:]
 
+
     var activeBoardReference: BoardReference? {
         guard model.activeBoardIndex >= 0, model.activeBoardIndex < model.boards.count else {
             return nil
@@ -88,6 +89,13 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
     }
 
     func snapshot(contentType: UTType) throws -> DocumentSnapshot {
+        if Thread.isMainThread {
+            return captureSnapshot()
+        }
+        return DispatchQueue.main.sync { captureSnapshot() }
+    }
+
+    private func captureSnapshot() -> DocumentSnapshot {
         var snapshotModel = model
         snapshotModel.modifiedAt = Date()
         return DocumentSnapshot(model: snapshotModel, boardDataMap: boardDataMap,
@@ -274,6 +282,25 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
         for i in board.elements.indices where ids.contains(board.elements[i].id) {
             board.elements[i] = Self.offsetElement(board.elements[i], by: delta)
         }
+
+        for i in board.elements.indices {
+            guard case .connector(var data) = board.elements[i].type else { continue }
+            var changed = false
+            if let srcId = data.sourceElementId, ids.contains(srcId) {
+                data.sourcePoint[0] += delta.x
+                data.sourcePoint[1] += delta.y
+                changed = true
+            }
+            if let tgtId = data.targetElementId, ids.contains(tgtId) {
+                data.targetPoint[0] += delta.x
+                data.targetPoint[1] += delta.y
+                changed = true
+            }
+            if changed && !ids.contains(board.elements[i].id) {
+                board.elements[i].type = .connector(data)
+            }
+        }
+
         boardDataMap[ref.id] = board
 
         let reverse = CGPoint(x: -delta.x, y: -delta.y)
@@ -300,6 +327,19 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
         case .image(var data):
             data.origin = [data.origin[0] + delta.x, data.origin[1] + delta.y]
             e.type = .image(data)
+
+        case .connector(var data):
+            data.sourcePoint = [data.sourcePoint[0] + delta.x, data.sourcePoint[1] + delta.y]
+            data.targetPoint = [data.targetPoint[0] + delta.x, data.targetPoint[1] + delta.y]
+            e.type = .connector(data)
+
+        case .table(var data):
+            data.origin = [data.origin[0] + delta.x, data.origin[1] + delta.y]
+            e.type = .table(data)
+
+        case .equation(var data):
+            data.position = [data.position[0] + delta.x, data.position[1] + delta.y]
+            e.type = .equation(data)
         }
         return e
     }
@@ -370,6 +410,26 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
                 data.origin = [cx - newW / 2, cy - newH / 2]
                 data.size = [newW, newH]
                 element.type = .image(data)
+
+            case .connector(var data):
+                let cx = (data.sourcePoint[0] + data.targetPoint[0]) / 2
+                let cy = (data.sourcePoint[1] + data.targetPoint[1]) / 2
+                data.sourcePoint = [cx + (data.sourcePoint[0] - cx) * factor,
+                                    cy + (data.sourcePoint[1] - cy) * factor]
+                data.targetPoint = [cx + (data.targetPoint[0] - cx) * factor,
+                                    cy + (data.targetPoint[1] - cy) * factor]
+                data.strokeWidth *= factor
+                element.type = .connector(data)
+
+            case .table(var data):
+                data.cellWidth *= factor
+                data.cellHeight *= factor
+                data.fontSize = max(data.fontSize * factor, 8)
+                element.type = .table(data)
+
+            case .equation(var data):
+                data.fontSize = max(data.fontSize * factor, 8)
+                element.type = .equation(data)
             }
         }
     }
@@ -405,6 +465,24 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
                 data.origin = [newBounds.origin.x, newBounds.origin.y]
                 data.size = [newBounds.width, newBounds.height]
                 element.type = .image(data)
+
+            case .connector(var data):
+                data.sourcePoint = [newBounds.minX + (data.sourcePoint[0] - oldBounds.minX) * sx,
+                                    newBounds.minY + (data.sourcePoint[1] - oldBounds.minY) * sy]
+                data.targetPoint = [newBounds.minX + (data.targetPoint[0] - oldBounds.minX) * sx,
+                                    newBounds.minY + (data.targetPoint[1] - oldBounds.minY) * sy]
+                element.type = .connector(data)
+
+            case .table(var data):
+                data.origin = [newBounds.origin.x, newBounds.origin.y]
+                data.cellWidth *= sx
+                data.cellHeight *= sy
+                element.type = .table(data)
+
+            case .equation(var data):
+                data.fontSize = max(data.fontSize * max(sx, sy), 8)
+                data.position = [newBounds.minX, newBounds.minY + data.fontSize * 1.4]
+                element.type = .equation(data)
             }
         }
     }

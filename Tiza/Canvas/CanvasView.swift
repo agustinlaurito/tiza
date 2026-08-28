@@ -1,5 +1,6 @@
 import AppKit
 import CoreGraphics
+import QuartzCore
 import UniformTypeIdentifiers
 
 final class CanvasView: NSView {
@@ -18,9 +19,12 @@ final class CanvasView: NSView {
     var onCameraChanged: ((Camera) -> Void)?
 
     private var activeTextField: NSTextField?
+    private var activeTextView: NSTextView?
+    private var activeEquationField: NSTextField?
     private var textEditWorldPosition: WorldPoint?
+    private var equationEditWorldPosition: WorldPoint?
     private var lastScreenPosition: CGPoint = .zero
-    private var laserTimer: Timer?
+    private var laserDisplayLink: CADisplayLink?
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
@@ -54,16 +58,16 @@ final class CanvasView: NSView {
             let cache = document?.imageCache ?? [:]
             let selIds = toolManager?.selectedElementIds ?? []
             let delta = (toolManager?.isMoving == true) ? (toolManager?.moveDelta ?? .zero) : .zero
-            let offsets = toolManager?.animatingOffsets ?? [:]
+            let offsets = toolManager?.animator.animatingOffsets ?? [:]
             Renderer.drawElements(board.elements, in: ctx, camera: camera,
                                   viewSize: viewSize, imageCache: cache,
                                   selectedIds: selIds, moveDelta: delta,
                                   animatingOffsets: offsets)
         }
 
-        if let tm = toolManager, !tm.deletingElements.isEmpty {
+        if let animator = toolManager?.animator, !animator.deletingElements.isEmpty {
             let cache = document?.imageCache ?? [:]
-            Renderer.drawDeletingElements(tm.deletingElements, in: ctx, camera: camera,
+            Renderer.drawDeletingElements(animator.deletingElements, in: ctx, camera: camera,
                                            viewSize: viewSize, imageCache: cache)
         }
 
@@ -108,6 +112,12 @@ final class CanvasView: NSView {
         if !tm.activeSmartGuides.isEmpty {
             Renderer.drawSmartGuides(tm.activeSmartGuides, in: ctx,
                                       camera: camera, viewSize: viewSize)
+        }
+
+        if let source = tm.inProgressConnectorSource, let target = tm.inProgressConnectorTarget {
+            Renderer.drawInProgressConnector(source: source, target: target,
+                                              color: tm.inProgressConnectorColor,
+                                              in: ctx, camera: camera, viewSize: viewSize)
         }
 
         if !tm.selectedElementIds.isEmpty, let board = boardData {
@@ -170,23 +180,24 @@ final class CanvasView: NSView {
     }
 
     private func ensureLaserTimer() {
-        guard laserTimer == nil else { return }
-        laserTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                self.presentationManager?.updateTrail()
-                if self.presentationManager?.hasLaserContent == true {
-                    self.needsDisplay = true
-                } else {
-                    self.stopLaserTimer()
-                }
+        guard laserDisplayLink == nil else { return }
+        let target = LaserDisplayLinkTarget { [weak self] in
+            guard let self else { return }
+            self.presentationManager?.updateTrail()
+            if self.presentationManager?.hasLaserContent == true {
+                self.needsDisplay = true
+            } else {
+                self.stopLaserTimer()
             }
         }
+        let link = self.displayLink(target: target, selector: #selector(LaserDisplayLinkTarget.step))
+        link.add(to: .main, forMode: .common)
+        laserDisplayLink = link
     }
 
     private func stopLaserTimer() {
-        laserTimer?.invalidate()
-        laserTimer = nil
+        laserDisplayLink?.invalidate()
+        laserDisplayLink = nil
         needsDisplay = true
     }
 
@@ -194,6 +205,7 @@ final class CanvasView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         commitTextEditing()
+        commitEquationEditing()
 
         let screenPoint = convert(event.locationInWindow, from: nil)
         lastScreenPosition = screenPoint
@@ -215,10 +227,15 @@ final class CanvasView: NSView {
         }
 
         guard let tm = toolManager, let ctx = makeToolContext() else { return }
+        tm.lastEventPressure = Double(event.pressure)
         tm.pointerDown(at: world, context: ctx)
 
-        if let pos = tm.textEditingPosition, activeTextField == nil {
+        if let pos = tm.textEditingPosition, activeTextField == nil, activeTextView == nil {
             beginTextEditing(at: pos)
+        }
+
+        if let pos = tm.equationEditingPosition, activeEquationField == nil {
+            beginEquationEditing(at: pos)
         }
 
         needsDisplay = true
@@ -245,6 +262,7 @@ final class CanvasView: NSView {
         }
 
         guard let ctx = makeToolContext() else { return }
+        toolManager?.lastEventPressure = Double(event.pressure)
         toolManager?.pointerDragged(to: world, context: ctx)
         needsDisplay = true
     }
@@ -270,6 +288,7 @@ final class CanvasView: NSView {
         }
 
         guard let ctx = makeToolContext() else { return }
+        toolManager?.lastEventPressure = Double(event.pressure)
         toolManager?.pointerUp(at: world, context: ctx)
         needsDisplay = true
     }
@@ -295,24 +314,32 @@ final class CanvasView: NSView {
         let fontSize: CGFloat = preset?.fontSize ?? 24.0
         let weight: NSFont.Weight = (preset?.isBold == true) ? .bold : .regular
 
-        let field = NSTextField(frame: NSRect(x: screenPoint.x - 2, y: screenPoint.y - fontSize - 2,
-                                              width: 400, height: fontSize + 8))
-        field.font = .systemFont(ofSize: fontSize, weight: weight)
-        field.textColor = toolManager?.currentColor.nsColor ?? .labelColor
-        field.isBordered = false
-        field.drawsBackground = false
-        field.backgroundColor = .clear
-        field.focusRingType = .none
-        field.isEditable = true
-        field.cell?.wraps = false
-        field.cell?.isScrollable = true
-        field.delegate = self
-        field.target = self
-        field.action = #selector(textFieldAction(_:))
+        let scrollView = NSScrollView(frame: NSRect(x: screenPoint.x - 2, y: screenPoint.y - fontSize - 2,
+                                                     width: 300, height: fontSize * 3 + 12))
+        scrollView.hasVerticalScroller = false
+        scrollView.hasHorizontalScroller = false
+        scrollView.borderType = .noBorder
+        scrollView.drawsBackground = false
 
-        addSubview(field)
-        window?.makeFirstResponder(field)
-        activeTextField = field
+        let textView = NSTextView(frame: scrollView.contentView.bounds)
+        textView.font = .systemFont(ofSize: fontSize, weight: weight)
+        textView.textColor = toolManager?.currentColor.nsColor ?? .labelColor
+        textView.drawsBackground = false
+        textView.backgroundColor = .clear
+        textView.focusRingType = .none
+        textView.isEditable = true
+        textView.isRichText = false
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = false
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.size = NSSize(width: 300, height: CGFloat.greatestFiniteMagnitude)
+        textView.delegate = self
+
+        scrollView.documentView = textView
+        addSubview(scrollView)
+        window?.makeFirstResponder(textView)
+        activeTextView = textView
     }
 
     @objc private func textFieldAction(_ sender: NSTextField) {
@@ -320,10 +347,50 @@ final class CanvasView: NSView {
     }
 
     private func commitTextEditing() {
+        if let textView = activeTextView {
+            let text = textView.string.trimmingCharacters(in: .whitespacesAndNewlines)
+            let position = textEditWorldPosition
+            let preset = toolManager?.textPreset
+
+            textView.enclosingScrollView?.removeFromSuperview()
+            activeTextView = nil
+            textEditWorldPosition = nil
+            toolManager?.textEditingPosition = nil
+            toolManager?.textPreset = nil
+
+            guard !text.isEmpty, let position = position, let ctx = makeToolContext() else {
+                toolManager?.restorePreviousTool()
+                window?.makeFirstResponder(self)
+                return
+            }
+
+            let fontSize = preset?.fontSize ?? 24.0
+            let bold = preset?.isBold ?? false
+            let isMultiline = text.contains("\n")
+
+            let textData = TextData(
+                position: [position.x, position.y],
+                content: text,
+                fontSize: fontSize,
+                color: toolManager?.currentColor ?? .black,
+                bold: bold,
+                rotation: 0,
+                width: isMultiline ? 300.0 : nil
+            )
+
+            let zIndex = boardData?.nextZIndex ?? 0
+            let element = Element(type: .text(textData), zIndex: zIndex)
+            ctx.addElement(element)
+
+            toolManager?.restorePreviousTool()
+            window?.makeFirstResponder(self)
+            needsDisplay = true
+            return
+        }
+
         guard let field = activeTextField else { return }
         let text = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         let position = textEditWorldPosition
-        let preset = toolManager?.textPreset
 
         field.removeFromSuperview()
         activeTextField = nil
@@ -337,15 +404,12 @@ final class CanvasView: NSView {
             return
         }
 
-        let fontSize = preset?.fontSize ?? 24.0
-        let bold = preset?.isBold ?? false
-
         let textData = TextData(
             position: [position.x, position.y],
             content: text,
-            fontSize: fontSize,
+            fontSize: 24.0,
             color: toolManager?.currentColor ?? .black,
-            bold: bold,
+            bold: false,
             rotation: 0
         )
 
@@ -359,12 +423,81 @@ final class CanvasView: NSView {
     }
 
     private func cancelTextEditing() {
-        guard let field = activeTextField else { return }
-        field.removeFromSuperview()
-        activeTextField = nil
+        if let textView = activeTextView {
+            textView.enclosingScrollView?.removeFromSuperview()
+            activeTextView = nil
+        }
+        if let field = activeTextField {
+            field.removeFromSuperview()
+            activeTextField = nil
+        }
         textEditWorldPosition = nil
         toolManager?.textEditingPosition = nil
         toolManager?.textPreset = nil
+        toolManager?.restorePreviousTool()
+        window?.makeFirstResponder(self)
+        needsDisplay = true
+    }
+
+    // MARK: - Equation Editing
+
+    private func beginEquationEditing(at worldPoint: WorldPoint) {
+        equationEditWorldPosition = worldPoint
+        let screenPoint = camera.worldToScreen(worldPoint, viewSize: bounds.size)
+
+        let field = NSTextField(frame: NSRect(x: screenPoint.x - 2, y: screenPoint.y - 26,
+                                              width: 300, height: 28))
+        field.font = .systemFont(ofSize: 16)
+        field.textColor = .labelColor
+        field.placeholderString = "LaTeX: e.g. x^{2} + \\alpha"
+        field.isBordered = true
+        field.drawsBackground = true
+        field.backgroundColor = .controlBackgroundColor
+        field.focusRingType = .default
+        field.isEditable = true
+        field.cell?.wraps = false
+        field.cell?.isScrollable = true
+        field.delegate = self
+        field.target = self
+        field.action = #selector(equationFieldAction(_:))
+        field.tag = 999
+
+        addSubview(field)
+        window?.makeFirstResponder(field)
+        activeEquationField = field
+    }
+
+    @objc private func equationFieldAction(_ sender: NSTextField) {
+        commitEquationEditing()
+    }
+
+    private func commitEquationEditing() {
+        guard let field = activeEquationField else { return }
+        let latex = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let position = equationEditWorldPosition
+
+        field.removeFromSuperview()
+        activeEquationField = nil
+        equationEditWorldPosition = nil
+        toolManager?.equationEditingPosition = nil
+
+        guard !latex.isEmpty, let position = position, let ctx = makeToolContext() else {
+            toolManager?.restorePreviousTool()
+            window?.makeFirstResponder(self)
+            return
+        }
+
+        let eqData = EquationData(
+            position: [position.x, position.y],
+            latex: latex,
+            fontSize: 24.0,
+            color: toolManager?.currentColor ?? .black
+        )
+
+        let zIndex = boardData?.nextZIndex ?? 0
+        let element = Element(type: .equation(eqData), zIndex: zIndex)
+        ctx.addElement(element)
+
         toolManager?.restorePreviousTool()
         window?.makeFirstResponder(self)
         needsDisplay = true
@@ -526,6 +659,7 @@ final class CanvasView: NSView {
         self.camera = newCamera
         self.currentBoardId = boardId
         self.currentBoardIndex = boardIndex
+        toolManager?.currentBackground = background
         window?.invalidateCursorRects(for: self)
         needsDisplay = true
     }
@@ -542,13 +676,50 @@ extension CanvasView: NSTextFieldDelegate {
     func control(_ control: NSControl, textView: NSTextView,
                  doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
-            cancelTextEditing()
+            if control.tag == 999 {
+                activeEquationField?.removeFromSuperview()
+                activeEquationField = nil
+                equationEditWorldPosition = nil
+                toolManager?.equationEditingPosition = nil
+                toolManager?.restorePreviousTool()
+                window?.makeFirstResponder(self)
+            } else {
+                cancelTextEditing()
+            }
             return true
         }
         if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-            commitTextEditing()
+            if control.tag == 999 {
+                commitEquationEditing()
+            } else {
+                commitTextEditing()
+            }
             return true
         }
         return false
     }
+}
+
+// MARK: - NSTextViewDelegate
+
+extension CanvasView: NSTextViewDelegate {
+    func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
+            cancelTextEditing()
+            return true
+        }
+        if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            if NSEvent.modifierFlags.contains(.shift) {
+                commitTextEditing()
+                return true
+            }
+        }
+        return false
+    }
+}
+
+private final class LaserDisplayLinkTarget: NSObject {
+    let callback: () -> Void
+    init(_ callback: @escaping () -> Void) { self.callback = callback }
+    @objc func step(_ link: CADisplayLink) { callback() }
 }

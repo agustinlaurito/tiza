@@ -5,6 +5,7 @@ final class EraserTool: Tool {
     unowned let manager: ToolManager
     private var erasedIds: Set<UUID> = []
     private var isGrouping = false
+    private weak var activeUndoManager: UndoManager?
 
     init(manager: ToolManager) {
         self.manager = manager
@@ -12,6 +13,7 @@ final class EraserTool: Tool {
 
     func pointerDown(at point: WorldPoint, context: ToolContext) {
         erasedIds = []
+        activeUndoManager = context.undoManager
         context.undoManager?.beginUndoGrouping()
         isGrouping = true
         eraseAt(point, context: context)
@@ -28,11 +30,16 @@ final class EraserTool: Tool {
             isGrouping = false
         }
         erasedIds = []
+        activeUndoManager = nil
     }
 
     func cancel() {
+        if isGrouping {
+            activeUndoManager?.endUndoGrouping()
+        }
         erasedIds = []
         isGrouping = false
+        activeUndoManager = nil
     }
 
     var cursor: NSCursor {
