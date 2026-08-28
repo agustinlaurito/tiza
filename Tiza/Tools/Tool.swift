@@ -112,6 +112,10 @@ struct ToolContext {
         document.resizeElement(id: id, newBounds: newBounds, undoManager: undoManager)
     }
 
+    func moveEndpoint(id: UUID, handle: HitTesting.HandlePosition, to point: CGPoint) {
+        document.moveEndpoint(id: id, handle: handle, to: point, undoManager: undoManager)
+    }
+
     func constrain(_ point: CGPoint) -> CGPoint {
         instrumentManager?.constrain(point) ?? point
     }

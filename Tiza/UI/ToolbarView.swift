@@ -15,6 +15,7 @@ struct ToolbarView: View {
 
     private let buttonSize: CGFloat = 32
     private let buttonSpacing: CGFloat = 2
+    private let flyoutGap: CGFloat = 8
 
     private var toolItems: [ToolItem] {
         var items: [ToolItem] = ToolType.primaryTools.map { .single($0) }
@@ -47,14 +48,16 @@ struct ToolbarView: View {
                               y: textButtonFrame.minY - 28)
             }
             if showShapePicker {
+                let menuH = CGFloat(ToolType.shapeTools.count) * 28 + 8
                 shapePicker
                     .position(x: shapeButtonFrame.midX,
-                              y: shapeButtonFrame.minY - 28)
+                              y: shapeButtonFrame.minY - flyoutGap - menuH / 2)
             }
             if showInsertPicker {
+                let menuH = CGFloat(ToolType.insertTools.count) * 28 + 8
                 insertPicker
                     .position(x: insertButtonFrame.midX,
-                              y: insertButtonFrame.minY - 28)
+                              y: insertButtonFrame.minY - flyoutGap - menuH / 2)
             }
         }
     }
@@ -174,9 +177,9 @@ struct ToolbarView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                 toolManager.switchTool(toolManager.lastShapeTool)
             }
-        } onLongPress: {
+        } onChevronTap: {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                showShapePicker = true
+                showShapePicker.toggle()
                 showTextPresets = false
                 showInsertPicker = false
             }
@@ -203,9 +206,9 @@ struct ToolbarView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                 toolManager.switchTool(toolManager.lastInsertTool)
             }
-        } onLongPress: {
+        } onChevronTap: {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                showInsertPicker = true
+                showInsertPicker.toggle()
                 showTextPresets = false
                 showShapePicker = false
             }
@@ -255,70 +258,32 @@ struct ToolbarView: View {
     }
 
     private var shapePicker: some View {
-        HStack(spacing: 2) {
-            ForEach(ToolType.shapeTools, id: \.self) { tool in
-                Button {
-                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                        showShapePicker = false
-                    }
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        toolManager.switchTool(tool)
-                    }
-                } label: {
-                    Image(systemName: tool.systemImage)
-                        .font(.system(size: 13, weight: toolManager.activeToolType == tool ? .semibold : .regular))
-                        .foregroundStyle(toolManager.activeToolType == tool ? .primary : .secondary)
-                        .frame(width: 32, height: 30)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .quickTooltip("\(tool.displayName) (\(String(tool.shortcutKey).uppercased()))")
+        FlyoutMenu(tools: ToolType.shapeTools, activeTool: toolManager.activeToolType) { tool in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                toolManager.switchTool(tool)
             }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .glassEffect(.regular, in: .capsule)
-        .transition(.scale(scale: 0.7).combined(with: .opacity))
-        .onHover { hovering in
-            if !hovering {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeOut(duration: 0.15)) { showShapePicker = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                    showShapePicker = false
                 }
             }
+        } onDismiss: {
+            withAnimation(.easeOut(duration: 0.15)) { showShapePicker = false }
         }
     }
 
     private var insertPicker: some View {
-        HStack(spacing: 2) {
-            ForEach(ToolType.insertTools, id: \.self) { tool in
-                Button {
-                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                        showInsertPicker = false
-                    }
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        toolManager.switchTool(tool)
-                    }
-                } label: {
-                    Image(systemName: tool.systemImage)
-                        .font(.system(size: 13, weight: toolManager.activeToolType == tool ? .semibold : .regular))
-                        .foregroundStyle(toolManager.activeToolType == tool ? .primary : .secondary)
-                        .frame(width: 32, height: 30)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .quickTooltip("\(tool.displayName) (\(String(tool.shortcutKey).uppercased()))")
+        FlyoutMenu(tools: ToolType.insertTools, activeTool: toolManager.activeToolType) { tool in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                toolManager.switchTool(tool)
             }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .glassEffect(.regular, in: .capsule)
-        .transition(.scale(scale: 0.7).combined(with: .opacity))
-        .onHover { hovering in
-            if !hovering {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeOut(duration: 0.15)) { showInsertPicker = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                    showInsertPicker = false
                 }
             }
+        } onDismiss: {
+            withAnimation(.easeOut(duration: 0.15)) { showInsertPicker = false }
         }
     }
 
@@ -495,6 +460,92 @@ private struct ToolButton: View {
     }
 }
 
+// MARK: - Flyout Menu
+
+private struct FlyoutMenu: View {
+    let tools: [ToolType]
+    let activeTool: ToolType
+    let onSelect: (ToolType) -> Void
+    let onDismiss: () -> Void
+
+    @State private var hoverY: CGFloat?
+    @State private var appeared = false
+
+    private let rowHeight: CGFloat = 28
+    private let rowSpacing: CGFloat = 0
+
+    var body: some View {
+        VStack(spacing: rowSpacing) {
+            ForEach(Array(tools.enumerated()), id: \.element) { index, tool in
+                let mag = flyoutMagnification(for: index)
+                Button {
+                    onSelect(tool)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: tool.systemImage)
+                            .font(.system(size: 12))
+                            .frame(width: 16)
+                        Text(tool.displayName)
+                            .font(.system(size: 12))
+                        Spacer()
+                        Text(String(tool.shortcutKey).uppercased())
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .foregroundStyle(activeTool == tool ? .primary : .secondary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .scaleEffect(mag, anchor: .leading)
+                .zIndex(mag > 1.01 ? Double(mag * 10) : 0)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 8)
+                .animation(
+                    .spring(response: 0.3, dampingFraction: 0.75)
+                        .delay(Double(tools.count - 1 - index) * 0.03),
+                    value: appeared
+                )
+            }
+        }
+        .frame(width: 140)
+        .padding(.vertical, 4)
+        .glassEffect(.regular, in: .rect(cornerRadius: 10))
+        .onContinuousHover { phase in
+            withAnimation(.interactiveSpring(response: 0.15, dampingFraction: 0.7)) {
+                switch phase {
+                case .active(let loc): hoverY = loc.y
+                case .ended: hoverY = nil
+                }
+            }
+        }
+        .onHover { hovering in
+            if !hovering {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    onDismiss()
+                }
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                appeared = true
+            }
+        }
+    }
+
+    private func flyoutMagnification(for index: Int) -> CGFloat {
+        guard let hy = hoverY else { return 1.0 }
+        let verticalPadding: CGFloat = 4
+        let center = verticalPadding + CGFloat(index) * (rowHeight + rowSpacing) + rowHeight / 2
+        let distance = abs(center - hy)
+        let range: CGFloat = 45
+        let maxMag: CGFloat = 0.12
+        let t = max(0, 1 - distance / range)
+        return 1.0 + maxMag * t * t
+    }
+}
+
 // MARK: - Tool Group Button
 
 private struct ToolGroupButton: View {
@@ -504,39 +555,37 @@ private struct ToolGroupButton: View {
     var selectionNS: Namespace.ID
     let selectionId: String
     let onTap: () -> Void
-    let onLongPress: () -> Void
+    let onChevronTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            ZStack(alignment: .bottomTrailing) {
-                Image(systemName: tool.systemImage)
-                    .font(.system(size: 13, weight: isActive ? .semibold : .regular))
-                    .foregroundStyle(isActive ? .primary : .secondary)
-                    .frame(width: 32, height: 32)
-
-                Image(systemName: "chevron.compact.down")
-                    .font(.system(size: 7, weight: .semibold))
-                    .foregroundStyle(.tertiary)
-                    .offset(x: -4, y: -3)
-            }
-            .contentShape(Rectangle())
-            .background {
-                if isActive {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 6))
-                        .glassEffectUnion(id: "toolbar", namespace: glassNS)
-                        .matchedGeometryEffect(id: selectionId, in: selectionNS)
-                }
-            }
+            Image(systemName: tool.systemImage)
+                .font(.system(size: 13, weight: isActive ? .semibold : .regular))
+                .foregroundStyle(isActive ? .primary : .secondary)
+                .frame(width: 32, height: 32)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .bottomTrailing) {
+            Image(systemName: "chevron.down")
+                .font(.system(size: 5, weight: .semibold))
+                .foregroundStyle(.quaternary)
+                .frame(width: 10, height: 10)
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onChevronTap)
+                .offset(x: 1, y: 1)
+        }
+        .background {
+            if isActive {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 6))
+                    .glassEffectUnion(id: "toolbar", namespace: glassNS)
+                    .matchedGeometryEffect(id: selectionId, in: selectionNS)
+            }
+        }
         .accessibilityLabel(tool.displayName)
-        .accessibilityHint("Hold for more options")
+        .accessibilityHint("Click arrow for more options")
         .accessibilityAddTraits(isActive ? .isSelected : [])
         .quickTooltip("\(tool.displayName) (\(String(tool.shortcutKey).uppercased()))")
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.4)
-                .onEnded { _ in onLongPress() }
-        )
     }
 }

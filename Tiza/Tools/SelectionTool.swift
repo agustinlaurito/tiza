@@ -10,6 +10,8 @@ final class SelectionTool: Tool {
         case moving(start: WorldPoint)
         case resizing(handle: HitTesting.HandlePosition, originalBounds: WorldRect,
                       elementId: UUID, start: WorldPoint)
+        case endpointDrag(handle: HitTesting.HandlePosition, elementId: UUID,
+                          originalPoint: WorldPoint)
     }
 
     private var dragMode: DragMode = .none
@@ -30,16 +32,38 @@ final class SelectionTool: Tool {
         let threshold = HitTesting.defaultThreshold
 
         if !shift, manager.selectedElementIds.count == 1,
-           let selectedId = manager.selectedElementIds.first,
-           let bounds = manager.selectionBounds(in: board) {
-            let handleSize: CGFloat = 12
-            if let handle = HitTesting.hitTestHandle(point: point, bounds: bounds,
-                                                      handleSize: handleSize) {
-                let el = board.elements.first { $0.id == selectedId }
-                if el?.locked != true {
-                    dragMode = .resizing(handle: handle, originalBounds: bounds,
-                                         elementId: selectedId, start: point)
+           let selectedId = manager.selectedElementIds.first {
+            let el = board.elements.first { $0.id == selectedId }
+            if let el, el.locked != true, HitTesting.isLineElement(el) {
+                let handleSize: CGFloat = 14
+                if let handle = HitTesting.hitTestLineEndpoint(point: point, element: el,
+                                                                handleSize: handleSize) {
+                    let originalPoint: CGPoint
+                    switch el.type {
+                    case .shape(let data):
+                        originalPoint = handle == .startPoint
+                            ? CGPoint(x: data.origin[0], y: data.origin[1])
+                            : CGPoint(x: data.origin[0] + data.size[0], y: data.origin[1] + data.size[1])
+                    case .connector(let data):
+                        originalPoint = handle == .startPoint
+                            ? CGPoint(x: data.sourcePoint[0], y: data.sourcePoint[1])
+                            : CGPoint(x: data.targetPoint[0], y: data.targetPoint[1])
+                    default:
+                        originalPoint = point
+                    }
+                    dragMode = .endpointDrag(handle: handle, elementId: selectedId,
+                                              originalPoint: originalPoint)
                     return
+                }
+            } else if let bounds = manager.selectionBounds(in: board) {
+                let handleSize: CGFloat = 12
+                if let handle = HitTesting.hitTestHandle(point: point, bounds: bounds,
+                                                          handleSize: handleSize) {
+                    if el?.locked != true {
+                        dragMode = .resizing(handle: handle, originalBounds: bounds,
+                                             elementId: selectedId, start: point)
+                        return
+                    }
                 }
             }
         }
@@ -121,6 +145,12 @@ final class SelectionTool: Tool {
             let newBounds = computeResizedBounds(original: originalBounds, handle: handle,
                                                   dx: dx, dy: dy)
             manager.resizingBounds = newBounds
+
+        case .endpointDrag(let handle, let elementId, _):
+            let constrained = NSEvent.modifierFlags.contains(.shift)
+                ? constrainEndpoint(point, handle: handle, elementId: elementId, context: context)
+                : point
+            context.moveEndpoint(id: elementId, handle: handle, to: constrained)
         }
     }
 
@@ -151,6 +181,9 @@ final class SelectionTool: Tool {
                 context.resizeElement(id: elementId, newBounds: newBounds)
             }
             manager.resizingBounds = nil
+
+        case .endpointDrag:
+            break
         }
 
         dragMode = .none
@@ -266,6 +299,34 @@ final class SelectionTool: Tool {
         return CGPoint(x: dx, y: dy)
     }
 
+    private func constrainEndpoint(_ point: CGPoint, handle: HitTesting.HandlePosition,
+                                    elementId: UUID, context: ToolContext) -> CGPoint {
+        guard let board = context.boardData,
+              let element = board.elements.first(where: { $0.id == elementId }) else { return point }
+
+        let anchor: CGPoint
+        switch element.type {
+        case .shape(let data):
+            anchor = handle == .startPoint
+                ? CGPoint(x: data.origin[0] + data.size[0], y: data.origin[1] + data.size[1])
+                : CGPoint(x: data.origin[0], y: data.origin[1])
+        case .connector(let data):
+            anchor = handle == .startPoint
+                ? CGPoint(x: data.targetPoint[0], y: data.targetPoint[1])
+                : CGPoint(x: data.sourcePoint[0], y: data.sourcePoint[1])
+        default:
+            return point
+        }
+
+        let dx = point.x - anchor.x
+        let dy = point.y - anchor.y
+        let angle = atan2(dy, dx)
+        let snapped = (angle / (.pi / 4)).rounded() * (.pi / 4)
+        let length = hypot(dx, dy)
+        return CGPoint(x: anchor.x + length * cos(snapped),
+                       y: anchor.y + length * sin(snapped))
+    }
+
     private func computeResizedBounds(original: WorldRect, handle: HitTesting.HandlePosition,
                                        dx: CGFloat, dy: CGFloat) -> WorldRect {
         var minX = original.minX
@@ -282,6 +343,8 @@ final class SelectionTool: Tool {
             minX += dx; maxY += dy
         case .bottomRight:
             maxX += dx; maxY += dy
+        case .startPoint, .endPoint:
+            break
         }
 
         let minSize: CGFloat = 10

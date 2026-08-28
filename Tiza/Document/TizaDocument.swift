@@ -487,6 +487,33 @@ final class TizaDocument: ReferenceFileDocument, @unchecked Sendable {
         }
     }
 
+    func moveEndpoint(id: UUID, handle: HitTesting.HandlePosition, to point: CGPoint,
+                       undoManager: UndoManager? = nil) {
+        updateElement(id: id, undoManager: undoManager) { element in
+            switch element.type {
+            case .shape(var data) where data.shapeType == .line || data.shapeType == .arrow:
+                if handle == .startPoint {
+                    let end = CGPoint(x: data.origin[0] + data.size[0],
+                                      y: data.origin[1] + data.size[1])
+                    data.origin = [point.x, point.y]
+                    data.size = [end.x - point.x, end.y - point.y]
+                } else {
+                    data.size = [point.x - data.origin[0], point.y - data.origin[1]]
+                }
+                element.type = .shape(data)
+            case .connector(var data):
+                if handle == .startPoint {
+                    data.sourcePoint = [point.x, point.y]
+                } else {
+                    data.targetPoint = [point.x, point.y]
+                }
+                element.type = .connector(data)
+            default:
+                break
+            }
+        }
+    }
+
     // MARK: - Alignment
 
     func alignElements(ids: Set<UUID>, alignment: AlignmentMode, undoManager: UndoManager? = nil) {

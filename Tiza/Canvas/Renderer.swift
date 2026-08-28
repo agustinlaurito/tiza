@@ -201,6 +201,48 @@ enum Renderer {
         context.restoreGState()
     }
 
+    static func drawLineEndpointHandles(_ element: Element, offset: CGPoint,
+                                         in context: CGContext, camera: Camera,
+                                         viewSize: CGSize) {
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        let handleSize: CGFloat = 7 / camera.scale
+        let lineWidth: CGFloat = 1.0 / camera.scale
+
+        let points: (CGPoint, CGPoint)
+        switch element.type {
+        case .shape(let data) where data.shapeType == .line || data.shapeType == .arrow:
+            points = (
+                CGPoint(x: data.origin[0] + offset.x, y: data.origin[1] + offset.y),
+                CGPoint(x: data.origin[0] + data.size[0] + offset.x,
+                        y: data.origin[1] + data.size[1] + offset.y)
+            )
+        case .connector(let data):
+            points = (
+                CGPoint(x: data.sourcePoint[0] + offset.x, y: data.sourcePoint[1] + offset.y),
+                CGPoint(x: data.targetPoint[0] + offset.x, y: data.targetPoint[1] + offset.y)
+            )
+        default:
+            context.restoreGState()
+            return
+        }
+
+        context.setStrokeColor(NSColor.controlAccentColor.cgColor)
+        context.setFillColor(NSColor.controlBackgroundColor.cgColor)
+        context.setLineWidth(lineWidth)
+
+        for pt in [points.0, points.1] {
+            let r = CGRect(x: pt.x - handleSize / 2, y: pt.y - handleSize / 2,
+                           width: handleSize, height: handleSize)
+            context.fillEllipse(in: r)
+            context.strokeEllipse(in: r)
+        }
+
+        context.restoreGState()
+    }
+
     static func drawInProgressShape(type: ShapeType, origin: CGPoint, size: CGSize,
                                       color: CodableColor, thickness: Double,
                                       in context: CGContext, camera: Camera, viewSize: CGSize) {

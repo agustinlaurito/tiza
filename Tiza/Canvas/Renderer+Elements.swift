@@ -161,6 +161,12 @@ extension Renderer {
             ctx.addLine(to: CGPoint(x: origin.x + size.width, y: origin.y + size.height))
             ctx.strokePath()
 
+            if let label = data.label, !label.isEmpty {
+                let end = CGPoint(x: origin.x + size.width, y: origin.y + size.height)
+                let mid = CGPoint(x: (origin.x + end.x) / 2, y: (origin.y + end.y) / 2)
+                drawLineLabel(label, at: mid, color: data.strokeColor, in: ctx, scale: scale)
+            }
+
         case .arrow:
             let start = origin
             let end = CGPoint(x: origin.x + size.width, y: origin.y + size.height)
@@ -174,6 +180,11 @@ extension Renderer {
 
             drawArrowhead(at: end, from: start, in: ctx,
                           size: max(data.strokeWidth * 3 / scale, 8 / scale))
+
+            if let label = data.label, !label.isEmpty {
+                let mid = CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2)
+                drawLineLabel(label, at: mid, color: data.strokeColor, in: ctx, scale: scale)
+            }
 
         case .triangle:
             let path = CGMutablePath()
@@ -259,6 +270,40 @@ extension Renderer {
         ctx.addLine(to: p2)
         ctx.closePath()
         ctx.fillPath()
+    }
+
+    // MARK: - Line Label
+
+    static func drawLineLabel(_ text: String, at center: CGPoint,
+                               color: CodableColor, in ctx: CGContext, scale: CGFloat) {
+        let fontSize: CGFloat = 13 / scale
+        let font = NSFont.systemFont(ofSize: fontSize, weight: .regular)
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: color.nsColor
+        ]
+        let attrStr = NSAttributedString(string: text, attributes: attrs)
+        let line = CTLineCreateWithAttributedString(attrStr)
+        let textBounds = CTLineGetBoundsWithOptions(line, .useOpticalBounds)
+
+        let padding: CGFloat = 5 / scale
+        let bgRect = CGRect(
+            x: center.x - textBounds.width / 2 - padding,
+            y: center.y - textBounds.height / 2 - padding,
+            width: textBounds.width + padding * 2,
+            height: textBounds.height + padding * 2
+        )
+
+        ctx.saveGState()
+        ctx.setFillColor(CGColor(gray: 1.0, alpha: 0.9))
+        ctx.fill(bgRect)
+        ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
+        ctx.textPosition = CGPoint(
+            x: center.x - textBounds.width / 2,
+            y: center.y + textBounds.height / 2 - 2 / scale
+        )
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
     }
 
     // MARK: - Text
@@ -366,6 +411,11 @@ extension Renderer {
         }
         if data.hasSourceArrow {
             drawArrowhead(at: source, from: target, in: ctx, size: arrowSize)
+        }
+
+        if let label = data.label, !label.isEmpty {
+            let mid = CGPoint(x: (source.x + target.x) / 2, y: (source.y + target.y) / 2)
+            drawLineLabel(label, at: mid, color: data.strokeColor, in: ctx, scale: scale)
         }
 
         ctx.restoreGState()

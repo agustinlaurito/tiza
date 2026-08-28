@@ -84,6 +84,7 @@ struct ShapeData: Codable, Equatable {
     var fillColor: CodableColor?
     var strokeWidth: Double
     var dashStyle: DashStyle = .solid
+    var label: String?
 }
 
 enum FontStyle: String, Codable, Equatable, CaseIterable {
@@ -211,6 +212,7 @@ struct ConnectorData: Codable, Equatable {
     var lineType: ConnectorLineType = .straight
     var hasSourceArrow: Bool = false
     var hasTargetArrow: Bool = true
+    var label: String?
 }
 
 struct TableData: Codable, Equatable {

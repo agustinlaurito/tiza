@@ -21,8 +21,10 @@ final class CanvasView: NSView {
     private var activeTextField: NSTextField?
     private var activeTextView: NSTextView?
     private var activeEquationField: NSTextField?
+    private var activeLabelField: NSTextField?
     private var textEditWorldPosition: WorldPoint?
     private var equationEditWorldPosition: WorldPoint?
+    private var labelEditElementId: UUID?
     private var lastScreenPosition: CGPoint = .zero
     private var laserDisplayLink: CADisplayLink?
 
@@ -121,11 +123,17 @@ final class CanvasView: NSView {
         }
 
         if !tm.selectedElementIds.isEmpty, let board = boardData {
-            if let resizeBounds = tm.resizingBounds {
+            let offset = tm.isMoving ? tm.moveDelta : .zero
+            if tm.selectedElementIds.count == 1,
+               let selectedId = tm.selectedElementIds.first,
+               let element = board.elements.first(where: { $0.id == selectedId }),
+               HitTesting.isLineElement(element) {
+                Renderer.drawLineEndpointHandles(element, offset: offset,
+                                                  in: ctx, camera: camera, viewSize: viewSize)
+            } else if let resizeBounds = tm.resizingBounds {
                 Renderer.drawSelectionHandles(resizeBounds, offset: .zero,
                                                in: ctx, camera: camera, viewSize: viewSize)
             } else if let bounds = tm.selectionBounds(in: board) {
-                let offset = tm.isMoving ? tm.moveDelta : .zero
                 Renderer.drawSelectionHandles(bounds, offset: offset,
                                                in: ctx, camera: camera, viewSize: viewSize)
             }
@@ -206,6 +214,7 @@ final class CanvasView: NSView {
     override func mouseDown(with event: NSEvent) {
         commitTextEditing()
         commitEquationEditing()
+        commitLabelEditing()
 
         let screenPoint = convert(event.locationInWindow, from: nil)
         lastScreenPosition = screenPoint
@@ -224,6 +233,29 @@ final class CanvasView: NSView {
         if let im = instrumentManager, im.beginInteraction(at: world) {
             needsDisplay = true
             return
+        }
+
+        if event.clickCount == 2, let board = boardData {
+            let threshold = 6.0 / camera.scale
+            if let element = HitTesting.hitTest(point: world, elements: board.elements, threshold: threshold) {
+                switch element.type {
+                case .shape(let data) where data.shapeType == .line || data.shapeType == .arrow:
+                    let start = CGPoint(x: data.origin[0], y: data.origin[1])
+                    let end = CGPoint(x: data.origin[0] + data.size[0], y: data.origin[1] + data.size[1])
+                    let mid = CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2)
+                    beginLabelEditing(elementId: element.id, at: mid, existing: data.label)
+                    return
+                case .connector(let data):
+                    let mid = CGPoint(
+                        x: (data.sourcePoint[0] + data.targetPoint[0]) / 2,
+                        y: (data.sourcePoint[1] + data.targetPoint[1]) / 2
+                    )
+                    beginLabelEditing(elementId: element.id, at: mid, existing: data.label)
+                    return
+                default:
+                    break
+                }
+            }
         }
 
         guard let tm = toolManager, let ctx = makeToolContext() else { return }
@@ -435,6 +467,75 @@ final class CanvasView: NSView {
         toolManager?.textEditingPosition = nil
         toolManager?.textPreset = nil
         toolManager?.restorePreviousTool()
+        window?.makeFirstResponder(self)
+        needsDisplay = true
+    }
+
+    // MARK: - Label Editing
+
+    private func beginLabelEditing(elementId: UUID, at worldPoint: WorldPoint, existing: String?) {
+        labelEditElementId = elementId
+
+        let screenPoint = camera.worldToScreen(worldPoint, viewSize: bounds.size)
+        let field = NSTextField(frame: NSRect(x: screenPoint.x - 75, y: screenPoint.y - 14,
+                                              width: 150, height: 24))
+        field.font = .systemFont(ofSize: 13)
+        field.textColor = .labelColor
+        field.placeholderString = "Label"
+        field.alignment = .center
+        field.isBordered = true
+        field.drawsBackground = true
+        field.backgroundColor = .controlBackgroundColor
+        field.focusRingType = .default
+        field.isEditable = true
+        field.cell?.wraps = false
+        field.cell?.isScrollable = true
+        field.delegate = self
+        field.target = self
+        field.action = #selector(labelFieldAction(_:))
+        field.tag = 998
+        if let existing { field.stringValue = existing }
+
+        addSubview(field)
+        window?.makeFirstResponder(field)
+        activeLabelField = field
+    }
+
+    @objc private func labelFieldAction(_ sender: NSTextField) {
+        commitLabelEditing()
+    }
+
+    private func commitLabelEditing() {
+        guard let field = activeLabelField, let elementId = labelEditElementId else { return }
+        let text = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        field.removeFromSuperview()
+        activeLabelField = nil
+        labelEditElementId = nil
+
+        let label: String? = text.isEmpty ? nil : text
+        document?.updateElement(id: elementId, undoManager: externalUndoManager) { element in
+            switch element.type {
+            case .shape(var data) where data.shapeType == .line || data.shapeType == .arrow:
+                data.label = label
+                element.type = .shape(data)
+            case .connector(var data):
+                data.label = label
+                element.type = .connector(data)
+            default:
+                break
+            }
+        }
+
+        window?.makeFirstResponder(self)
+        needsDisplay = true
+    }
+
+    private func cancelLabelEditing() {
+        guard let field = activeLabelField else { return }
+        field.removeFromSuperview()
+        activeLabelField = nil
+        labelEditElementId = nil
         window?.makeFirstResponder(self)
         needsDisplay = true
     }
@@ -676,7 +777,9 @@ extension CanvasView: NSTextFieldDelegate {
     func control(_ control: NSControl, textView: NSTextView,
                  doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
-            if control.tag == 999 {
+            if control.tag == 998 {
+                cancelLabelEditing()
+            } else if control.tag == 999 {
                 activeEquationField?.removeFromSuperview()
                 activeEquationField = nil
                 equationEditWorldPosition = nil
@@ -689,7 +792,9 @@ extension CanvasView: NSTextFieldDelegate {
             return true
         }
         if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-            if control.tag == 999 {
+            if control.tag == 998 {
+                commitLabelEditing()
+            } else if control.tag == 999 {
                 commitEquationEditing()
             } else {
                 commitTextEditing()

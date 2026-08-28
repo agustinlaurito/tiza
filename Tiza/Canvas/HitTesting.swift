@@ -194,6 +194,7 @@ enum HitTesting {
 
     enum HandlePosition: Equatable {
         case topLeft, topRight, bottomLeft, bottomRight
+        case startPoint, endPoint
     }
 
     static func hitTestHandle(point: WorldPoint, bounds: WorldRect,
@@ -217,6 +218,42 @@ enum HitTesting {
             }
         }
         return nil
+    }
+
+    static func hitTestLineEndpoint(point: WorldPoint, element: Element,
+                                      handleSize: CGFloat) -> HandlePosition? {
+        let hs = handleSize / 2
+        switch element.type {
+        case .shape(let data) where data.shapeType == .line || data.shapeType == .arrow:
+            let start = CGPoint(x: data.origin[0], y: data.origin[1])
+            let end = CGPoint(x: data.origin[0] + data.size[0], y: data.origin[1] + data.size[1])
+            if CGRect(x: start.x - hs, y: start.y - hs, width: handleSize, height: handleSize).contains(point) {
+                return .startPoint
+            }
+            if CGRect(x: end.x - hs, y: end.y - hs, width: handleSize, height: handleSize).contains(point) {
+                return .endPoint
+            }
+        case .connector(let data):
+            let start = CGPoint(x: data.sourcePoint[0], y: data.sourcePoint[1])
+            let end = CGPoint(x: data.targetPoint[0], y: data.targetPoint[1])
+            if CGRect(x: start.x - hs, y: start.y - hs, width: handleSize, height: handleSize).contains(point) {
+                return .startPoint
+            }
+            if CGRect(x: end.x - hs, y: end.y - hs, width: handleSize, height: handleSize).contains(point) {
+                return .endPoint
+            }
+        default:
+            break
+        }
+        return nil
+    }
+
+    static func isLineElement(_ element: Element) -> Bool {
+        switch element.type {
+        case .shape(let data): data.shapeType == .line || data.shapeType == .arrow
+        case .connector: true
+        default: false
+        }
     }
 
     // MARK: - Geometry helpers
