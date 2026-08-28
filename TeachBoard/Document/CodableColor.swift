@@ -39,4 +39,18 @@ struct CodableColor: Codable, Equatable, Hashable, Sendable {
     static let yellow = CodableColor(r: 1.0, g: 0.92, b: 0.23)
 
     static let palette: [CodableColor] = [.black, .red, .blue, .green, .orange, .purple, .white]
+
+    var accessibilityName: String {
+        switch self {
+        case .black: return "Black"
+        case .white: return "White"
+        case .red: return "Red"
+        case .blue: return "Blue"
+        case .green: return "Green"
+        case .orange: return "Orange"
+        case .purple: return "Purple"
+        case .yellow: return "Yellow"
+        default: return "Custom color"
+        }
+    }
 }

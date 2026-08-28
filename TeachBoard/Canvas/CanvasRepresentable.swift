@@ -2,9 +2,18 @@ import SwiftUI
 
 struct CanvasRepresentable: NSViewRepresentable {
     @ObservedObject var document: TeachBoardDocument
+    @ObservedObject var toolManager: ToolManager
+    @ObservedObject var instrumentManager: InstrumentManager
+    @ObservedObject var presentationManager: PresentationManager
+    var undoManager: UndoManager?
 
     func makeNSView(context: Context) -> CanvasView {
         let view = CanvasView(frame: .zero)
+        view.document = document
+        view.toolManager = toolManager
+        view.instrumentManager = instrumentManager
+        view.presentationManager = presentationManager
+        view.externalUndoManager = undoManager
         view.onCameraChanged = { [weak document] newCamera in
             document?.updateCamera(newCamera)
         }
@@ -13,6 +22,11 @@ struct CanvasRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ view: CanvasView, context: Context) {
+        view.document = document
+        view.toolManager = toolManager
+        view.instrumentManager = instrumentManager
+        view.presentationManager = presentationManager
+        view.externalUndoManager = undoManager
         updateView(view)
     }
 

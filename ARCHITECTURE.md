@@ -74,10 +74,10 @@ BoardData (separate file per board)
 
 1. **Background** — Solid color, grid, dotted grid, or lines (via `BoardBackgroundRenderer`)
 2. **Content** — All elements sorted by zIndex (via `Renderer`)
-3. **Instruments** — Ruler, protractor, etc. (future)
-4. **Selection** — Handles and bounding boxes (future)
-5. **In-progress** — Currently-being-drawn stroke/shape (future)
-6. **Presentation** — Laser trail, spotlight dimming (future)
+3. **Instruments** — Ruler, protractor overlays (via `InstrumentRenderer`)
+4. **Selection** — Handles and bounding boxes
+5. **In-progress** — Currently-being-drawn stroke/shape
+6. **Presentation** — Laser trail (hold Space), spotlight dimming (⇧⌘L)
 
 The renderer operates in world space by applying the camera's affine transform to the CG context before drawing elements. Element-level properties (stroke width) are adjusted by `1/scale` so they appear constant on screen regardless of zoom.
 
@@ -99,18 +99,22 @@ protocol Tool {
 
 ## Instrument System (Phase 5)
 
+Instruments are managed by `InstrumentManager` (ObservableObject) and use `InstrumentState` structs:
+
 ```
-protocol Instrument {
-    func constrain(point: WorldPoint, tool: ToolType) -> WorldPoint?
-    func hitTest(point: WorldPoint) -> InstrumentHitResult?
-    func render(in context: CGContext, camera: Camera)
+struct InstrumentState: Identifiable {
+    let kind: InstrumentKind   // .ruler or .protractor
+    var center: CGPoint        // position in world coords
+    var angle: Double          // rotation in radians
 }
 ```
 
-- Instruments are **not tools** — they're persistent overlays
-- They coexist with any active tool
-- The active tool queries instruments for constraints through ToolContext
-- Example: pen near ruler edge → ruler.constrain() snaps the point to the edge
+- Instruments are **not tools** — they're persistent overlays that coexist with any active tool
+- `InstrumentRenderer` draws them between content and selection layers
+- `InstrumentHitTesting` detects clicks on body (→ move) or rotation handle (→ rotate)
+- `InstrumentManager.constrain(_:threshold:)` snaps drawing points to instrument edges
+- `ToolContext.constrain(_:)` makes snapping transparent to tools (pen, highlighter, shapes)
+- Toggled via Instruments menu (⌘U ruler, ⌘J protractor)
 
 ## Undo / Redo
 

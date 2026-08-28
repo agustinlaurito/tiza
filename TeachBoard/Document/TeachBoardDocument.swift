@@ -13,6 +13,7 @@ final class TeachBoardDocument: ReferenceFileDocument, @unchecked Sendable {
 
     @Published var model: DocumentModel
     @Published var boardDataMap: [UUID: BoardData]
+    var imageCache: [String: NSImage] = [:]
 
     var activeBoardReference: BoardReference? {
         guard model.activeBoardIndex >= 0, model.activeBoardIndex < model.boards.count else {
@@ -66,6 +67,16 @@ final class TeachBoardDocument: ReferenceFileDocument, @unchecked Sendable {
                 boardDataMap[boardRef.id] = BoardData(id: boardRef.id)
             }
         }
+
+        if let assetFiles = wrapper["assets"]?.fileWrappers {
+            for (filename, fileWrapper) in assetFiles {
+                if let data = fileWrapper.regularFileContents,
+                   let image = NSImage(data: data) {
+                    let id = (filename as NSString).deletingPathExtension
+                    imageCache[id] = image
+                }
+            }
+        }
     }
 
     // MARK: - Snapshot & Save
@@ -73,12 +84,14 @@ final class TeachBoardDocument: ReferenceFileDocument, @unchecked Sendable {
     struct DocumentSnapshot {
         let model: DocumentModel
         let boardDataMap: [UUID: BoardData]
+        let imageCache: [String: NSImage]
     }
 
     func snapshot(contentType: UTType) throws -> DocumentSnapshot {
         var snapshotModel = model
         snapshotModel.modifiedAt = Date()
-        return DocumentSnapshot(model: snapshotModel, boardDataMap: boardDataMap)
+        return DocumentSnapshot(model: snapshotModel, boardDataMap: boardDataMap,
+                                imageCache: imageCache)
     }
 
     func fileWrapper(snapshot: DocumentSnapshot, configuration: WriteConfiguration) throws -> FileWrapper {
@@ -102,6 +115,16 @@ final class TeachBoardDocument: ReferenceFileDocument, @unchecked Sendable {
 
         let assetsDirectory = FileWrapper(directoryWithFileWrappers: [:])
         assetsDirectory.preferredFilename = "assets"
+
+        for (id, image) in snapshot.imageCache {
+            if let rep = image.tiffRepresentation,
+               let bitmap = NSBitmapImageRep(data: rep),
+               let png = bitmap.representation(using: .png, properties: [:]) {
+                let assetWrapper = FileWrapper(regularFileWithContents: png)
+                assetWrapper.preferredFilename = id + ".png"
+                assetsDirectory.addFileWrapper(assetWrapper)
+            }
+        }
 
         let root = FileWrapper(directoryWithFileWrappers: [
             "document.json": documentFileWrapper,
@@ -211,5 +234,99 @@ final class TeachBoardDocument: ReferenceFileDocument, @unchecked Sendable {
 
     func reorderBoards(from source: IndexSet, to destination: Int) {
         model.boards.move(fromOffsets: source, toOffset: destination)
+    }
+
+    // MARK: - Element Operations
+
+    func addElement(_ element: Element, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference else { return }
+        boardDataMap[ref.id, default: BoardData(id: ref.id)].elements.append(element)
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.removeElement(id: element.id, undoManager: undoManager)
+        }
+    }
+
+    func removeElement(id: UUID, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id],
+              let index = board.elements.firstIndex(where: { $0.id == id }) else { return }
+
+        let removed = board.elements.remove(at: index)
+        boardDataMap[ref.id] = board
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            guard var b = doc.boardDataMap[ref.id] else { return }
+            let insertAt = min(index, b.elements.count)
+            b.elements.insert(removed, at: insertAt)
+            doc.boardDataMap[ref.id] = b
+
+            undoManager?.registerUndo(withTarget: doc) { doc2 in
+                doc2.removeElement(id: removed.id, undoManager: undoManager)
+            }
+        }
+    }
+
+    func moveElements(ids: Set<UUID>, delta: CGPoint, undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id] else { return }
+
+        for i in board.elements.indices where ids.contains(board.elements[i].id) {
+            board.elements[i] = Self.offsetElement(board.elements[i], by: delta)
+        }
+        boardDataMap[ref.id] = board
+
+        let reverse = CGPoint(x: -delta.x, y: -delta.y)
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.moveElements(ids: ids, delta: reverse, undoManager: undoManager)
+        }
+    }
+
+    private static func offsetElement(_ element: Element, by delta: CGPoint) -> Element {
+        var e = element
+        switch e.type {
+        case .stroke(var data):
+            data.points = data.points.map { [$0[0] + delta.x, $0[1] + delta.y] }
+            e.type = .stroke(data)
+
+        case .shape(var data):
+            data.origin = [data.origin[0] + delta.x, data.origin[1] + delta.y]
+            e.type = .shape(data)
+
+        case .text(var data):
+            data.position = [data.position[0] + delta.x, data.position[1] + delta.y]
+            e.type = .text(data)
+
+        case .image(var data):
+            data.origin = [data.origin[0] + delta.x, data.origin[1] + delta.y]
+            e.type = .image(data)
+        }
+        return e
+    }
+
+    func clearBoard(undoManager: UndoManager? = nil) {
+        guard let ref = activeBoardReference,
+              var board = boardDataMap[ref.id], !board.elements.isEmpty else { return }
+
+        let saved = board.elements
+        board.elements = []
+        boardDataMap[ref.id] = board
+
+        undoManager?.registerUndo(withTarget: self) { doc in
+            guard var b = doc.boardDataMap[ref.id] else { return }
+            b.elements = saved
+            doc.boardDataMap[ref.id] = b
+            undoManager?.registerUndo(withTarget: doc) { doc2 in
+                doc2.clearBoard(undoManager: undoManager)
+            }
+        }
+    }
+
+    // MARK: - Image Assets
+
+    func addImageAsset(_ image: NSImage) -> String {
+        let id = UUID().uuidString
+        imageCache[id] = image
+        return id
     }
 }

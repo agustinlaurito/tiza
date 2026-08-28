@@ -3,7 +3,8 @@ import CoreGraphics
 
 enum Renderer {
     static func drawElements(_ elements: [Element], in context: CGContext,
-                              camera: Camera, viewSize: CGSize) {
+                              camera: Camera, viewSize: CGSize,
+                              imageCache: [String: NSImage] = [:]) {
         let transform = camera.affineTransform(for: viewSize)
         let visibleWorld = camera.visibleWorldRect(viewSize: viewSize)
 
@@ -12,14 +13,16 @@ enum Renderer {
 
         let sorted = elements.sorted { $0.zIndex < $1.zIndex }
         for element in sorted {
-            drawElement(element, in: context, visibleWorld: visibleWorld, scale: camera.scale)
+            drawElement(element, in: context, visibleWorld: visibleWorld,
+                        scale: camera.scale, imageCache: imageCache)
         }
 
         context.restoreGState()
     }
 
     private static func drawElement(_ element: Element, in ctx: CGContext,
-                                     visibleWorld: WorldRect, scale: CGFloat) {
+                                     visibleWorld: WorldRect, scale: CGFloat,
+                                     imageCache: [String: NSImage]) {
         switch element.type {
         case .stroke(let data):
             drawStroke(data, in: ctx, scale: scale)
@@ -27,10 +30,129 @@ enum Renderer {
             drawShape(data, in: ctx, scale: scale)
         case .text(let data):
             drawText(data, in: ctx, scale: scale)
-        case .image:
-            break // Phase 3
+        case .image(let data):
+            drawImage(data, in: ctx, scale: scale, imageCache: imageCache)
         }
     }
+
+    // MARK: - In-Progress & Selection Overlays
+
+    static func drawInProgressStroke(points: [CGPoint], color: CodableColor, thickness: Double,
+                                      style: StrokeStyle, in context: CGContext,
+                                      camera: Camera, viewSize: CGSize) {
+        guard points.count >= 2 else { return }
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        let data = StrokeData(
+            points: points.map { [$0.x, $0.y] },
+            color: color, thickness: thickness, style: style
+        )
+        drawStroke(data, in: context, scale: camera.scale)
+
+        context.restoreGState()
+    }
+
+    static func drawDragRect(_ rect: WorldRect, in context: CGContext,
+                              camera: Camera, viewSize: CGSize) {
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        let lineWidth = 1.0 / camera.scale
+        context.setLineWidth(lineWidth)
+        context.setLineDash(phase: 0, lengths: [4 / camera.scale, 4 / camera.scale])
+
+        context.setFillColor(NSColor.selectedControlColor.withAlphaComponent(0.08).cgColor)
+        context.fill(rect)
+
+        context.setStrokeColor(NSColor.selectedControlColor.cgColor)
+        context.stroke(rect)
+
+        context.restoreGState()
+    }
+
+    static func drawSelectionHandles(_ bounds: WorldRect, offset: CGPoint,
+                                      in context: CGContext, camera: Camera,
+                                      viewSize: CGSize) {
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        let rect = bounds.offsetBy(dx: offset.x, dy: offset.y)
+        let padding: CGFloat = 4 / camera.scale
+        let padded = rect.insetBy(dx: -padding, dy: -padding)
+
+        context.setStrokeColor(NSColor.controlAccentColor.cgColor)
+        context.setLineWidth(1.0 / camera.scale)
+        context.setLineDash(phase: 0, lengths: [])
+        context.stroke(padded)
+
+        let handleSize: CGFloat = 6 / camera.scale
+        let corners = [
+            CGPoint(x: padded.minX, y: padded.minY),
+            CGPoint(x: padded.maxX, y: padded.minY),
+            CGPoint(x: padded.minX, y: padded.maxY),
+            CGPoint(x: padded.maxX, y: padded.maxY),
+        ]
+
+        context.setFillColor(NSColor.controlBackgroundColor.cgColor)
+        for corner in corners {
+            let r = CGRect(x: corner.x - handleSize / 2, y: corner.y - handleSize / 2,
+                           width: handleSize, height: handleSize)
+            context.fillEllipse(in: r)
+            context.strokeEllipse(in: r)
+        }
+
+        context.restoreGState()
+    }
+
+    static func drawInProgressShape(type: ShapeType, origin: CGPoint, size: CGSize,
+                                      color: CodableColor, thickness: Double,
+                                      in context: CGContext, camera: Camera, viewSize: CGSize) {
+        let transform = camera.affineTransform(for: viewSize)
+        context.saveGState()
+        context.concatenate(transform)
+
+        let data = ShapeData(
+            shapeType: type, origin: [origin.x, origin.y],
+            size: [size.width, size.height], rotation: 0,
+            strokeColor: color, fillColor: nil, strokeWidth: thickness
+        )
+        drawShape(data, in: context, scale: camera.scale)
+
+        context.restoreGState()
+    }
+
+    // MARK: - Image
+
+    private static func drawImage(_ data: ImageData, in ctx: CGContext, scale: CGFloat,
+                                    imageCache: [String: NSImage]) {
+        guard let image = imageCache[data.assetId],
+              let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+
+        let origin = CGPoint(x: data.origin[0], y: data.origin[1])
+        let size = CGSize(width: data.size[0], height: data.size[1])
+
+        ctx.saveGState()
+
+        if data.rotation != 0 {
+            let cx = origin.x + size.width / 2
+            let cy = origin.y + size.height / 2
+            ctx.translateBy(x: cx, y: cy)
+            ctx.rotate(by: data.rotation)
+            ctx.translateBy(x: -cx, y: -cy)
+        }
+
+        ctx.translateBy(x: origin.x, y: origin.y + size.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(cgImage, in: CGRect(origin: .zero, size: size))
+
+        ctx.restoreGState()
+    }
+
+    // MARK: - Stroke
 
     private static func drawStroke(_ data: StrokeData, in ctx: CGContext, scale: CGFloat) {
         guard data.points.count >= 2 else { return }

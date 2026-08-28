@@ -8,8 +8,25 @@ struct TeachBoardApp: App {
             MainWindowContent(document: config.document)
         }
         .commands {
+            exportCommands
             boardCommands
             viewCommands
+            toolCommands
+            instrumentCommands
+            presentationCommands
+        }
+    }
+
+    private var exportCommands: some Commands {
+        CommandGroup(replacing: .importExport) {
+            Button("Export as PNG\u{2026}") {
+                NotificationCenter.default.post(name: .exportPNG, object: nil)
+            }
+            .keyboardShortcut("e", modifiers: [.command, .shift])
+
+            Button("Export as PDF\u{2026}") {
+                NotificationCenter.default.post(name: .exportPDF, object: nil)
+            }
         }
     }
 
@@ -42,6 +59,12 @@ struct TeachBoardApp: App {
             Button("Delete Board") {
                 NotificationCenter.default.post(name: .deleteBoard, object: nil)
             }
+
+            Divider()
+
+            Button("Clear Board") {
+                NotificationCenter.default.post(name: .clearBoard, object: nil)
+            }
         }
     }
 
@@ -65,6 +88,46 @@ struct TeachBoardApp: App {
             .keyboardShortcut("0", modifiers: .command)
         }
     }
+
+    private var toolCommands: some Commands {
+        CommandMenu("Tools") {
+            ForEach(ToolType.drawingTools) { tool in
+                Button(tool.displayName) {
+                    NotificationCenter.default.post(name: .switchTool,
+                                                     object: tool.rawValue)
+                }
+                .keyboardShortcut(KeyEquivalent(tool.shortcutKey), modifiers: [])
+            }
+        }
+    }
+
+    private var instrumentCommands: some Commands {
+        CommandMenu("Instruments") {
+            Button("Toggle Ruler") {
+                NotificationCenter.default.post(name: .toggleRuler, object: nil)
+            }
+            .keyboardShortcut("u", modifiers: .command)
+
+            Button("Toggle Protractor") {
+                NotificationCenter.default.post(name: .toggleProtractor, object: nil)
+            }
+            .keyboardShortcut("j", modifiers: .command)
+        }
+    }
+
+    private var presentationCommands: some Commands {
+        CommandMenu("Presentation") {
+            Button("Laser Pointer (Hold Space)") {}
+                .disabled(true)
+
+            Divider()
+
+            Button("Toggle Spotlight") {
+                NotificationCenter.default.post(name: .toggleSpotlight, object: nil)
+            }
+            .keyboardShortcut("l", modifiers: [.command, .shift])
+        }
+    }
 }
 
 extension Notification.Name {
@@ -76,4 +139,11 @@ extension Notification.Name {
     static let zoomIn = Notification.Name("TeachBoard.zoomIn")
     static let zoomOut = Notification.Name("TeachBoard.zoomOut")
     static let zoomFit = Notification.Name("TeachBoard.zoomFit")
+    static let switchTool = Notification.Name("TeachBoard.switchTool")
+    static let clearBoard = Notification.Name("TeachBoard.clearBoard")
+    static let toggleRuler = Notification.Name("TeachBoard.toggleRuler")
+    static let toggleProtractor = Notification.Name("TeachBoard.toggleProtractor")
+    static let toggleSpotlight = Notification.Name("TeachBoard.toggleSpotlight")
+    static let exportPNG = Notification.Name("TeachBoard.exportPNG")
+    static let exportPDF = Notification.Name("TeachBoard.exportPDF")
 }
