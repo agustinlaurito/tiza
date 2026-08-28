@@ -1,0 +1,529 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		28D2C260A6578B2682690598 /* CodableColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBDA3E50CE14CFA2C317C32C /* CodableColor.swift */; };
+		2AA6D7D8D69A569BEF3B7C9F /* BoardBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1EDCC6565BD9F6DC5EAE7BA /* BoardBackground.swift */; };
+		3D9DF2401B966FFEEE67519B /* CameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736F0FF4B2F99979C69C8E2C /* CameraTests.swift */; };
+		5289C082B6CB2E3540A18A43 /* TeachBoardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B5CFDA74D8A26AD12E9601 /* TeachBoardApp.swift */; };
+		54A725B309CA43EEBFFAC1A7 /* TeachBoardDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6127D18A354CA96235EC3B88 /* TeachBoardDocument.swift */; };
+		670B82EC2F607B12C72AA401 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B2DB7834AC2B2B9CF78082 /* Renderer.swift */; };
+		77440FDA5EE183135BE7CDCA /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D12B84E53447B18796AF23 /* Camera.swift */; };
+		7ACB14D2CC4CE9D2779B9302 /* MainWindowContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8545E49697C7EED04229CB02 /* MainWindowContent.swift */; };
+		873DAB773D9BA35CEC622D4F /* Element.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0D915432302ACF4120C3E26 /* Element.swift */; };
+		8DD44D8C369FBDA14FEECE6E /* DocumentSerializationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876E10FBB1E97D4897EC34A5 /* DocumentSerializationTests.swift */; };
+		95352B5A71BA877759C73C1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DCE09F8FF5C0C968B1FD3E7 /* Assets.xcassets */; };
+		9836ECF77A0A93E6C8DB7AE5 /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94764F30BE04D1055F2520EC /* DocumentModel.swift */; };
+		BBD074C3197B15C42CFF2ECE /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D63984B4BEC83A8AA4AFAF /* CanvasView.swift */; };
+		BE892E1B4A5418D5C9C2684E /* CanvasRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3833060007CF0170745B35A /* CanvasRepresentable.swift */; };
+		BF89E39E956F4EEAB420F96D /* SchemaVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA171A9189F9D9B7559AF2EF /* SchemaVersion.swift */; };
+		CECD1E83697447E9BD393E64 /* BoardNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59C288BBFADCABCAFECFA27 /* BoardNavigator.swift */; };
+		DBAA12D740143A4BFA6B27F3 /* BoardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A0DCC25DA9C7126602BB3D /* BoardData.swift */; };
+		FD442184D39DB78339429CF7 /* WorldPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744B4965DB11256D598AEE58 /* WorldPoint.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D39DFD78A3A6C646AF73F291 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D49EF08474D7A026E288443 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E85170B3C3936ADF452470F5;
+			remoteInfo = TeachBoard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03B2DB7834AC2B2B9CF78082 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		27A0DCC25DA9C7126602BB3D /* BoardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardData.swift; sourceTree = "<group>"; };
+		3BB2247BB6F2855D01A0A218 /* TeachBoard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TeachBoard.entitlements; sourceTree = "<group>"; };
+		3DCE09F8FF5C0C968B1FD3E7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3F2696AB1D1E66825DD4AC07 /* TeachBoardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TeachBoardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		59D12B84E53447B18796AF23 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		6127D18A354CA96235EC3B88 /* TeachBoardDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeachBoardDocument.swift; sourceTree = "<group>"; };
+		6A66800609FEAB93423FF190 /* TeachBoard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeachBoard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		736F0FF4B2F99979C69C8E2C /* CameraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraTests.swift; sourceTree = "<group>"; };
+		744B4965DB11256D598AEE58 /* WorldPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldPoint.swift; sourceTree = "<group>"; };
+		8545E49697C7EED04229CB02 /* MainWindowContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowContent.swift; sourceTree = "<group>"; };
+		876E10FBB1E97D4897EC34A5 /* DocumentSerializationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSerializationTests.swift; sourceTree = "<group>"; };
+		91D63984B4BEC83A8AA4AFAF /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+		94764F30BE04D1055F2520EC /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
+		A4B5CFDA74D8A26AD12E9601 /* TeachBoardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeachBoardApp.swift; sourceTree = "<group>"; };
+		B3833060007CF0170745B35A /* CanvasRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasRepresentable.swift; sourceTree = "<group>"; };
+		BA171A9189F9D9B7559AF2EF /* SchemaVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaVersion.swift; sourceTree = "<group>"; };
+		CBDA3E50CE14CFA2C317C32C /* CodableColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColor.swift; sourceTree = "<group>"; };
+		CCEF9038494632E3ED724D6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D0D915432302ACF4120C3E26 /* Element.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Element.swift; sourceTree = "<group>"; };
+		F1EDCC6565BD9F6DC5EAE7BA /* BoardBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardBackground.swift; sourceTree = "<group>"; };
+		F59C288BBFADCABCAFECFA27 /* BoardNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardNavigator.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		067EC8E761878541F090A36E /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				F59C288BBFADCABCAFECFA27 /* BoardNavigator.swift */,
+				8545E49697C7EED04229CB02 /* MainWindowContent.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		1363FEB5605BB4D58A016D00 /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				F1EDCC6565BD9F6DC5EAE7BA /* BoardBackground.swift */,
+				59D12B84E53447B18796AF23 /* Camera.swift */,
+				B3833060007CF0170745B35A /* CanvasRepresentable.swift */,
+				91D63984B4BEC83A8AA4AFAF /* CanvasView.swift */,
+				03B2DB7834AC2B2B9CF78082 /* Renderer.swift */,
+			);
+			path = Canvas;
+			sourceTree = "<group>";
+		};
+		35860729ACBA5A99A2AC14AB = {
+			isa = PBXGroup;
+			children = (
+				764F67393A30E4737AF38391 /* TeachBoard */,
+				9B91911219889A52351CDE50 /* TeachBoardTests */,
+				C833A8DB337830398CC1A9FB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3DE15CCA2F05A329570AEA75 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3DCE09F8FF5C0C968B1FD3E7 /* Assets.xcassets */,
+				CCEF9038494632E3ED724D6B /* Info.plist */,
+				3BB2247BB6F2855D01A0A218 /* TeachBoard.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		6FB81241C6C8EA5A3A7C7215 /* Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				744B4965DB11256D598AEE58 /* WorldPoint.swift */,
+			);
+			path = Geometry;
+			sourceTree = "<group>";
+		};
+		764F67393A30E4737AF38391 /* TeachBoard */ = {
+			isa = PBXGroup;
+			children = (
+				FBC80FC0FBBE62ACC4C293BA /* App */,
+				1363FEB5605BB4D58A016D00 /* Canvas */,
+				C9D0D907F9E9E01A6AB21D24 /* Document */,
+				6FB81241C6C8EA5A3A7C7215 /* Geometry */,
+				3DE15CCA2F05A329570AEA75 /* Resources */,
+				067EC8E761878541F090A36E /* UI */,
+			);
+			path = TeachBoard;
+			sourceTree = "<group>";
+		};
+		9B91911219889A52351CDE50 /* TeachBoardTests */ = {
+			isa = PBXGroup;
+			children = (
+				736F0FF4B2F99979C69C8E2C /* CameraTests.swift */,
+				876E10FBB1E97D4897EC34A5 /* DocumentSerializationTests.swift */,
+			);
+			path = TeachBoardTests;
+			sourceTree = "<group>";
+		};
+		C833A8DB337830398CC1A9FB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6A66800609FEAB93423FF190 /* TeachBoard.app */,
+				3F2696AB1D1E66825DD4AC07 /* TeachBoardTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C9D0D907F9E9E01A6AB21D24 /* Document */ = {
+			isa = PBXGroup;
+			children = (
+				27A0DCC25DA9C7126602BB3D /* BoardData.swift */,
+				CBDA3E50CE14CFA2C317C32C /* CodableColor.swift */,
+				94764F30BE04D1055F2520EC /* DocumentModel.swift */,
+				D0D915432302ACF4120C3E26 /* Element.swift */,
+				BA171A9189F9D9B7559AF2EF /* SchemaVersion.swift */,
+				6127D18A354CA96235EC3B88 /* TeachBoardDocument.swift */,
+			);
+			path = Document;
+			sourceTree = "<group>";
+		};
+		FBC80FC0FBBE62ACC4C293BA /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A4B5CFDA74D8A26AD12E9601 /* TeachBoardApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8E7990D9B8079565407B2253 /* TeachBoardTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 93DEC16BAC78DE7C26EF4ADB /* Build configuration list for PBXNativeTarget "TeachBoardTests" */;
+			buildPhases = (
+				16EBA49321F6C3CBFF5276A4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8ED8C99391937E6AF07BA3C7 /* PBXTargetDependency */,
+			);
+			name = TeachBoardTests;
+			packageProductDependencies = (
+			);
+			productName = TeachBoardTests;
+			productReference = 3F2696AB1D1E66825DD4AC07 /* TeachBoardTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E85170B3C3936ADF452470F5 /* TeachBoard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D503FEBD5898266946AC894D /* Build configuration list for PBXNativeTarget "TeachBoard" */;
+			buildPhases = (
+				CD7FEBCB1134F08A5D0F8CA5 /* Sources */,
+				35B81EB622F6D48DD2F89277 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TeachBoard;
+			packageProductDependencies = (
+			);
+			productName = TeachBoard;
+			productReference = 6A66800609FEAB93423FF190 /* TeachBoard.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0D49EF08474D7A026E288443 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = C3BAC5DAF8B090E9B8A8FD56 /* Build configuration list for PBXProject "TeachBoard" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 35860729ACBA5A99A2AC14AB;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C833A8DB337830398CC1A9FB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E85170B3C3936ADF452470F5 /* TeachBoard */,
+				8E7990D9B8079565407B2253 /* TeachBoardTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		35B81EB622F6D48DD2F89277 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95352B5A71BA877759C73C1A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		16EBA49321F6C3CBFF5276A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D9DF2401B966FFEEE67519B /* CameraTests.swift in Sources */,
+				8DD44D8C369FBDA14FEECE6E /* DocumentSerializationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CD7FEBCB1134F08A5D0F8CA5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AA6D7D8D69A569BEF3B7C9F /* BoardBackground.swift in Sources */,
+				DBAA12D740143A4BFA6B27F3 /* BoardData.swift in Sources */,
+				CECD1E83697447E9BD393E64 /* BoardNavigator.swift in Sources */,
+				77440FDA5EE183135BE7CDCA /* Camera.swift in Sources */,
+				BE892E1B4A5418D5C9C2684E /* CanvasRepresentable.swift in Sources */,
+				BBD074C3197B15C42CFF2ECE /* CanvasView.swift in Sources */,
+				28D2C260A6578B2682690598 /* CodableColor.swift in Sources */,
+				9836ECF77A0A93E6C8DB7AE5 /* DocumentModel.swift in Sources */,
+				873DAB773D9BA35CEC622D4F /* Element.swift in Sources */,
+				7ACB14D2CC4CE9D2779B9302 /* MainWindowContent.swift in Sources */,
+				670B82EC2F607B12C72AA401 /* Renderer.swift in Sources */,
+				BF89E39E956F4EEAB420F96D /* SchemaVersion.swift in Sources */,
+				5289C082B6CB2E3540A18A43 /* TeachBoardApp.swift in Sources */,
+				54A725B309CA43EEBFFAC1A7 /* TeachBoardDocument.swift in Sources */,
+				FD442184D39DB78339429CF7 /* WorldPoint.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8ED8C99391937E6AF07BA3C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E85170B3C3936ADF452470F5 /* TeachBoard */;
+			targetProxy = D39DFD78A3A6C646AF73F291 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4F2FBFE090F79936B5B9F76E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_MODULE_NAME = TeachBoardTests;
+				SDKROOT = macosx;
+				SWIFT_EMIT_MODULE_INTERFACE = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TeachBoard.app/Contents/MacOS/TeachBoard";
+			};
+			name = Release;
+		};
+		729540EB4D180622E23C57B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_MODULE_NAME = TeachBoardTests;
+				SDKROOT = macosx;
+				SWIFT_EMIT_MODULE_INTERFACE = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TeachBoard.app/Contents/MacOS/TeachBoard";
+			};
+			name = Debug;
+		};
+		B9D861B8297BA2CB891B96E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TeachBoard;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.TeachBoard;
+				PRODUCT_NAME = TeachBoard;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		D236312DCA65557B2EFC96CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TeachBoard/Resources/TeachBoard.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = TeachBoard/Resources/Info.plist;
+				INFOPLIST_KEY_NSDocumentClass = "$(PRODUCT_MODULE_NAME).TeachBoardDocument";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Release;
+		};
+		EAA4376B9708D1D851CBCAF0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TeachBoard/Resources/TeachBoard.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = TeachBoard/Resources/Info.plist;
+				INFOPLIST_KEY_NSDocumentClass = "$(PRODUCT_MODULE_NAME).TeachBoardDocument";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Debug;
+		};
+		F7DCDDD754488580033A9FE4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TeachBoard;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.TeachBoard;
+				PRODUCT_NAME = TeachBoard;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		93DEC16BAC78DE7C26EF4ADB /* Build configuration list for PBXNativeTarget "TeachBoardTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				729540EB4D180622E23C57B4 /* Debug */,
+				4F2FBFE090F79936B5B9F76E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C3BAC5DAF8B090E9B8A8FD56 /* Build configuration list for PBXProject "TeachBoard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F7DCDDD754488580033A9FE4 /* Debug */,
+				B9D861B8297BA2CB891B96E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D503FEBD5898266946AC894D /* Build configuration list for PBXNativeTarget "TeachBoard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EAA4376B9708D1D851CBCAF0 /* Debug */,
+				D236312DCA65557B2EFC96CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0D49EF08474D7A026E288443 /* Project object */;
+}
